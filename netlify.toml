@@ -1,0 +1,12 @@
+# Netlify auto-detects Next.js from package.json and otherwise tries to run
+# its Next.js Runtime plugin, which targets a server build and can invoke the
+# old `next export` step — removed entirely in Next 14 in favour of
+# `output: "export"`. Being explicit here skips that path: build with plain
+# `next build` (which already writes the static export because of
+# `output: "export"` in next.config.mjs) and serve `out/` directly.
+[build]
+  command = "npm run build"
+  publish = "out"
+
+[build.environment]
+  NODE_VERSION = "20"
