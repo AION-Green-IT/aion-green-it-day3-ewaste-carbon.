@@ -46,3 +46,86 @@ export function isDiminishingReturns(config: WorkBlock2Config, cycleYears: numbe
   if (first <= 0) return false;
   return marginalSavingsKg(config, cycleYears) < first * (config.diminishingReturnsThresholdPct / 100);
 }
+
+// --- Part A: the hand-worked questions, and the checking logic behind them ---
+
+/** Office B's total retired-laptop count — Model A and B units share the same cycle, so they retire together. */
+export function officeBTotalUnits(config: WorkBlock2Config): number {
+  return config.officeB.modelAUnits + config.officeB.modelBUnits;
+}
+
+/**
+ * The five reference answers, computed from `config` — never a separate set
+ * of numbers to keep in sync by hand. Q5 has no numeric answer (see
+ * `isRefusal`/`containsNumber` below); this only covers Q1–Q4.
+ */
+export function computePartAAnswers(config: WorkBlock2Config): {
+  q1: number;
+  q2: number;
+  q3: number;
+  q4: number;
+} {
+  const q1 = (config.unitsInOffice / config.partAQuizCycleYears) * config.pcfPerUnitKg;
+  const q2 = q1 / 1000;
+  const q3 =
+    (config.officeB.modelAUnits / config.officeB.cycleYears) * config.pcfPerUnitKg +
+    (config.officeB.modelBUnits / config.officeB.cycleYears) * config.modelBPcfPerUnitKg;
+  const q4 = officeBTotalUnits(config) * (config.disposalLandfillKg - config.disposalRecyclerKg);
+  return { q1, q2, q3, q4 };
+}
+
+/**
+ * Numeric-answer check: ±2% relative tolerance, comma or period accepted as
+ * the decimal separator. Empty or unparseable input is simply not correct
+ * yet — never flagged as a hard wrong answer.
+ */
+export function withinTolerance(input: string, correct: number, tolerancePct = 2): boolean {
+  const parsed = Number.parseFloat(input.trim().replace(",", "."));
+  if (Number.isNaN(parsed)) return false;
+  return Math.abs(parsed - correct) <= Math.abs(correct) * (tolerancePct / 100);
+}
+
+const REFUSAL_PATTERNS = [
+  "cannot",
+  "can't",
+  "cant",
+  "not enough",
+  "insufficient",
+  "missing",
+  "don't know",
+  "dont know",
+  "no data",
+  "unknown",
+  "unable",
+  "not possible",
+  "not available",
+  "n/a",
+];
+
+/** True when the free-text answer reads as a refusal to compute — Q5's actually-correct move. */
+export function isRefusal(text: string): boolean {
+  const t = text.toLowerCase();
+  return REFUSAL_PATTERNS.some((p) => t.includes(p));
+}
+
+/** True when the free-text answer contains a digit — a specific-number attempt worth flagging, not blocking. */
+export function containsNumber(text: string): boolean {
+  return /\d/.test(text);
+}
+
+/**
+ * Part A counts as done once Q1–Q4 are each within tolerance and Q5 has
+ * something written — correctness of Q5 isn't required, only that it was
+ * engaged with (a wrong extrapolation still surfaces the mistake, which is
+ * the point).
+ */
+export function partAComplete(config: WorkBlock2Config, notes: Record<string, string>): boolean {
+  const { q1, q2, q3, q4 } = computePartAAnswers(config);
+  return (
+    withinTolerance(notes["workBlock2_q1"] ?? "", q1) &&
+    withinTolerance(notes["workBlock2_q2"] ?? "", q2) &&
+    withinTolerance(notes["workBlock2_q3"] ?? "", q3) &&
+    withinTolerance(notes["workBlock2_q4"] ?? "", q4) &&
+    (notes["workBlock2_q5"] ?? "").trim().length > 0
+  );
+}

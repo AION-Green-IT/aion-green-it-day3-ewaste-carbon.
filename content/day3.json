@@ -331,8 +331,74 @@
         "cycleDefault": 3,
         "residualAtMinCyclePct": 35,
         "residualAtMaxCyclePct": 5,
-        "diminishingReturnsThresholdPct": 25
+        "diminishingReturnsThresholdPct": 25,
+        "modelBPcfPerUnitKg": 410,
+        "disposalLandfillKg": 12,
+        "disposalRecyclerKg": 3,
+        "partAQuizCycleYears": 2,
+        "officeB": {
+          "name": "Berlin hub",
+          "modelAUnits": 25,
+          "modelBUnits": 15,
+          "cycleYears": 3
+        },
+        "fleetOfficeCount": 12
       },
+      "partA": {
+        "kicker": "Part A — Do the math by hand",
+        "title": "Do the math by hand",
+        "intro": "Before the slider does this for you, do it yourself — same formula, same case. Five questions, one calculator, no shortcuts.",
+        "tableTitle": "IT Carbon Factors",
+        "formulaLabel": "Annual embodied carbon = (units ÷ cycle years) × factor",
+        "table": [
+          { "item": "Laptop Model A (standard)", "category": "Manufacturing", "configKey": "pcfPerUnitKg", "unit": "kg CO₂e / unit" },
+          { "item": "Laptop Model B (premium)", "category": "Manufacturing", "configKey": "modelBPcfPerUnitKg", "unit": "kg CO₂e / unit" },
+          { "item": "Disposal — landfill (undocumented)", "category": "Disposal", "configKey": "disposalLandfillKg", "unit": "kg CO₂e / unit" },
+          { "item": "Disposal — certified recycler", "category": "Disposal", "configKey": "disposalRecyclerKg", "unit": "kg CO₂e / unit" }
+        ],
+        "calculatorTitle": "Calculator",
+        "questions": [
+          {
+            "id": "q1",
+            "kind": "number",
+            "prompt": "{officeA} has {unitsA} Model A laptops on a {cycleA}-year cycle. What is the annual embodied carbon, in kg CO₂e?",
+            "unit": "kg CO₂e",
+            "placeholder": "kg CO₂e"
+          },
+          {
+            "id": "q2",
+            "kind": "number",
+            "prompt": "Express your answer to Q1 in tonnes CO₂e (1 tonne = 1000 kg).",
+            "unit": "t CO₂e",
+            "placeholder": "t CO₂e"
+          },
+          {
+            "id": "q3",
+            "kind": "number",
+            "prompt": "{officeB} has {unitsBA} Model A laptops and {unitsBB} Model B laptops, both on a {cycleB}-year cycle. What is the total annual embodied carbon for {officeB}, in kg CO₂e?",
+            "unit": "kg CO₂e",
+            "placeholder": "kg CO₂e"
+          },
+          {
+            "id": "q4",
+            "kind": "number",
+            "prompt": "If {officeB}'s {totalB} retired laptops went to landfill instead of a certified recycler, how much extra CO₂e would that add, in kg?",
+            "unit": "kg CO₂e",
+            "placeholder": "kg CO₂e"
+          },
+          {
+            "id": "q5",
+            "kind": "text",
+            "prompt": "Nexora has {fleetOffices} country offices in total. Using the numbers above, what is Nexora's total annual embodied carbon across the whole fleet?",
+            "placeholder": "A number, or an explanation of why you can't give one."
+          }
+        ],
+        "correctFeedback": "That checks out.",
+        "retryFeedback": "Check your numbers and try again.",
+        "q5FlagHint": "Check your assumptions — do you have unit counts and models for all {fleetOffices} offices? See your Work Block #1 diagnosis.",
+        "q5NoTaskYet": "Complete Work Block #1 first — its diagnosis is what this question is testing."
+      },
+      "partBKicker": "Part B — Explore",
       "marginalLabel": "Next half-year of extension would save",
       "diminishingLabel": "Diminishing returns from here",
       "diminishingHelp": "Longer cycles still cut carbon, just less and less — this step saved much less than the first half-year did. That's the maths, not a verdict on which cycle to pick.",

@@ -5,11 +5,13 @@ import {
   getSection,
   SECTION_ORDER,
   type BasicsSection,
+  type DataSection,
   type Task1Section,
   type NexoraSection,
   type SectionId,
 } from "@/lib/content";
 import { useProgress } from "@/lib/store";
+import { partAComplete } from "@/lib/workBlock2";
 
 export type SectionStatus = {
   id: SectionId;
@@ -38,6 +40,7 @@ export function useSectionStatuses(): {
 
   const basics = getSection<BasicsSection>("basics");
   const task1 = getSection<Task1Section>("task1");
+  const dataSection = getSection<DataSection>("data");
   const nexora = getSection<NexoraSection>("nexora");
 
   // Note: `checks["nexora:..."]` is used for "clue opened" tracking now, not
@@ -57,11 +60,14 @@ export function useSectionStatuses(): {
       done: (seen.task1 ?? []).length + (choices.task1 ? 1 : 0),
       total: task1.clues.length + 1,
     },
-    // Done once both required justification fields are filled — the same
-    // bar the playground's own export button gates on.
+    // Done once Part A's five hand-worked questions AND Part B's two
+    // justification fields are both filled — the same bar the playground's
+    // own export button gates on.
     data: {
       done:
-        (notes["workBlock2_cycleWhy"]?.trim() && notes["workBlock2_gapNote"]?.trim())
+        partAComplete(dataSection.config, notes) &&
+        !!notes["workBlock2_cycleWhy"]?.trim() &&
+        !!notes["workBlock2_gapNote"]?.trim()
           ? 1
           : 0,
       total: 1,

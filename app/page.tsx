@@ -115,7 +115,7 @@ export default function Page() {
         intro={dataSection.intro}
         doneRule={dataSection.doneRule}
       >
-        <CarbonPlayground section={dataSection} />
+        <CarbonPlayground section={dataSection} diagnosisSection={task1} />
       </Section>
 
       {/* Task 2 — hidden for now, keep for later use

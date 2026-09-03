@@ -196,6 +196,49 @@ export type WorkBlock2Config = {
    * not an asserted year, so retuning the fleet numbers retunes the knee too.
    */
   diminishingReturnsThresholdPct: number;
+
+  // --- Part A ("do the math by hand") — same case, three more reference
+  // numbers and a second office, added here rather than inlined in the
+  // question component so every number stays trainer-editable in one place.
+  /** Embodied carbon per unit for the office's second laptop model, kg CO2e. */
+  modelBPcfPerUnitKg: number;
+  /** Embodied carbon released per unit sent to landfill instead of tracked, kg CO2e. */
+  disposalLandfillKg: number;
+  /** Embodied carbon released per unit through a certified recycler, kg CO2e. */
+  disposalRecyclerKg: number;
+  /** The fixed cycle length Q1 asks about — independent of the Part B slider's own range. */
+  partAQuizCycleYears: number;
+  /** A second office, mixed fleet, used only for the Part A worked questions. */
+  officeB: {
+    name: string;
+    modelAUnits: number;
+    modelBUnits: number;
+    cycleYears: number;
+  };
+  /** Nexora's total country-office count — what Q5 asks the learner to reason about extrapolating to. */
+  fleetOfficeCount: number;
+};
+
+export type CarbonTableRow = {
+  item: string;
+  category: string;
+  /** Which WorkBlock2Config field holds this row's number — the table reads the value live, never a second copy of it. */
+  configKey: "pcfPerUnitKg" | "modelBPcfPerUnitKg" | "disposalLandfillKg" | "disposalRecyclerKg";
+  unit: string;
+};
+
+export type PartAQuestion = {
+  id: string;
+  /**
+   * "number" checks the typed value against a computed answer within
+   * tolerance. "text" (Q5 only) checks for refusal wording and separately
+   * flags — never blocks on — an attempt to compute a specific figure.
+   */
+  kind: "number" | "text";
+  /** Question text with {tokens} — see PartA component for the substitution list (unitsA, cycleA, officeB, unitsBA, unitsBB, cycleB, totalB, fleetOffices). */
+  prompt: string;
+  unit?: string;
+  placeholder: string;
 };
 
 export type DataSection = SectionBase & {
@@ -226,6 +269,24 @@ export type DataSection = SectionBase & {
     closingLine: string;
   };
   turn: string;
+  /** The hand-worked half of the block, shown above the slider playground. */
+  partA: {
+    kicker: string;
+    title: string;
+    intro: string;
+    tableTitle: string;
+    formulaLabel: string;
+    table: CarbonTableRow[];
+    calculatorTitle: string;
+    questions: PartAQuestion[];
+    correctFeedback: string;
+    retryFeedback: string;
+    /** Shown when Q5 is answered with a specific number instead of a refusal — never a hard "wrong". */
+    q5FlagHint: string;
+    /** Shown above Q5's own reference box before Task's diagnosis has landed. */
+    q5NoTaskYet: string;
+  };
+  partBKicker: string;
 };
 
 export type Task2Section = SectionBase & {

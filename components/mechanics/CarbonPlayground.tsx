@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import type { DataSection } from "@/lib/content";
+import type { DataSection, Task1Section } from "@/lib/content";
 import { useHydrated, useProgress } from "@/lib/store";
 import {
   annualEmissionsKg,
@@ -12,6 +12,7 @@ import {
 } from "@/lib/workBlock2";
 import { C } from "@/components/visuals/palette";
 import { exportFilename, printAsFile } from "@/lib/exportFilename";
+import { PartA } from "@/components/mechanics/PartA";
 
 /**
  * Work Block #2: hands-on with the Source lever Task already flagged as the
@@ -20,7 +21,13 @@ import { exportFilename, printAsFile } from "@/lib/exportFilename";
  * countable yet — see the locked toggle below). Two meters move in opposite
  * directions on purpose, so sliding to either extreme still costs something.
  */
-export function CarbonPlayground({ section }: { section: DataSection }) {
+export function CarbonPlayground({
+  section,
+  diagnosisSection,
+}: {
+  section: DataSection;
+  diagnosisSection: Task1Section;
+}) {
   const hydrated = useHydrated();
   const { config } = section;
 
@@ -69,6 +76,12 @@ export function CarbonPlayground({ section }: { section: DataSection }) {
 
   return (
     <div className="space-y-6">
+      <PartA section={section} diagnosisSection={diagnosisSection} />
+
+      <p className="text-caption font-semibold uppercase tracking-wide text-purple">
+        {section.partBKicker}
+      </p>
+
       {/* Slider */}
       <div className="card p-4">
         <label className="block">
