@@ -10,6 +10,7 @@ import {
   liveQuadrantDots,
   modelQuadrantDots,
 } from "@/lib/quadrant";
+import { exportFilename, printAsFile } from "@/lib/exportFilename";
 
 export function RiskCategorizer({ section }: { section: Task1Section }) {
   const byCode = Object.fromEntries(
@@ -373,30 +374,28 @@ function DiagnosisPicker({ section }: { section: Task1Section }) {
  */
 function ExportControls({ section }: { section: Task1Section }) {
   const hydrated = useHydrated();
-  const name = useProgress((s) => s.notes["task1:name"] ?? "");
-  const setNote = useProgress((s) => s.setNote);
+  const setPrintTarget = useProgress((s) => s.setPrintTarget);
+  const name = useProgress((s) => s.notes["learner:name"] ?? "");
+
+  const exportNote = () => {
+    setPrintTarget("task1");
+    printAsFile(exportFilename(name, 1, section.exportNote.taskLabel));
+  };
 
   return (
     <div className="card p-4">
       <p className="text-h3 text-ink">{section.exportNote.controlsTitle}</p>
       <p className="mt-1 text-body text-ash">{section.exportNote.controlsIntro}</p>
-
-      <label className="mt-3 block max-w-xs">
-        <span className="mb-1 block text-caption font-semibold uppercase tracking-wide text-ash">
-          {section.exportNote.nameLabel}
+      <p className="mt-2 text-caption text-ash">
+        Exporting as:{" "}
+        <span className="font-semibold text-ink">
+          {hydrated && name.trim() ? name : "no name yet — add one at the top of the page"}
         </span>
-        <input
-          type="text"
-          value={hydrated ? name : ""}
-          onChange={(e) => setNote("task1:name", e.target.value)}
-          placeholder={section.exportNote.namePlaceholder}
-          className="w-full rounded-xl border border-line bg-paper p-2.5 text-body text-ink placeholder:text-ash/70 focus:border-purple"
-        />
-      </label>
+      </p>
 
       <button
         type="button"
-        onClick={() => window.print()}
+        onClick={exportNote}
         className="mt-4 rounded-xl bg-navy px-4 py-2 text-body font-semibold text-paper transition-colors duration-200 hover:bg-purple"
       >
         {section.exportNote.exportLabel}

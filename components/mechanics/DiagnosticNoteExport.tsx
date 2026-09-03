@@ -14,8 +14,11 @@ import { liveQuadrantDots } from "@/lib/quadrant";
  */
 export function DiagnosticNoteExport({ section }: { section: Task1Section }) {
   const hydrated = useHydrated();
+  const printTarget = useProgress((s) => s.printTarget);
   const choices = useProgress((s) => s.choices);
-  const name = useProgress((s) => s.notes["task1:name"] ?? "");
+  const name = useProgress((s) => s.notes["learner:name"] ?? "");
+
+  if (printTarget !== "task1") return null;
 
   const byCode = Object.fromEntries(
     section.categories.map((c) => [c.code, c]),

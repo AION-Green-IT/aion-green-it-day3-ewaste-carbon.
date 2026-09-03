@@ -34,14 +34,16 @@ export function useSectionStatuses(): {
 } {
   const seen = useProgress((s) => s.seen);
   const choices = useProgress((s) => s.choices);
-  const checks = useProgress((s) => s.checks);
+  const notes = useProgress((s) => s.notes);
 
   const basics = getSection<BasicsSection>("basics");
   const task1 = getSection<Task1Section>("task1");
   const nexora = getSection<NexoraSection>("nexora");
 
-  const nexoraChecked = nexora.components.filter(
-    (c) => checks[`nexora:${c.id}`],
+  // Note: `checks["nexora:..."]` is used for "clue opened" tracking now, not
+  // completion — a step counts as addressed once it has drafted text.
+  const nexoraAddressed = nexora.components.filter(
+    (c) => (notes[`nexora:${c.id}`] ?? "").trim().length > 0,
   ).length;
 
   const raw: Record<SectionId, { done: number; total: number }> = {
@@ -55,13 +57,20 @@ export function useSectionStatuses(): {
       done: (seen.task1 ?? []).length + (choices.task1 ? 1 : 0),
       total: task1.clues.length + 1,
     },
-    // Ticked once the learner has a number to defend and has drafted D3.
-    data: { done: checks["data:d3"] ? 1 : 0, total: 1 },
+    // Done once both required justification fields are filled — the same
+    // bar the playground's own export button gates on.
+    data: {
+      done:
+        (notes["workBlock2_cycleWhy"]?.trim() && notes["workBlock2_gapNote"]?.trim())
+          ? 1
+          : 0,
+      total: 1,
+    },
     // A single pick completes the mechanic.
     task2: { done: choices.task2 ? 1 : 0, total: 1 },
     bluegrid: { done: choices.bluegrid ? 1 : 0, total: 1 },
     // Self-paced worksheet: engaged once at least one component is ticked.
-    nexora: { done: nexoraChecked, total: 1 },
+    nexora: { done: nexoraAddressed, total: 1 },
   };
 
   const statuses: SectionStatus[] = SECTION_ORDER.map((id) => {

@@ -35,6 +35,15 @@ type Session = {
    * state on it so "sort these again" wipes revealed answers too.
    */
   sectionResets: Record<string, number>;
+  /**
+   * Which section's printable note should render right now. Several blocks
+   * each keep a `.print-note` element mounted; only the one matching this
+   * id ever un-hides, so triggering one export can't drag another block's
+   * page into the same print job. Not persisted — set immediately before
+   * `window.print()` and left as-is after, since only the matching note
+   * ever shows regardless of what it's left pointing at.
+   */
+  printTarget: string | null;
 };
 
 type Actions = {
@@ -42,6 +51,7 @@ type Actions = {
   choose: (sectionId: string, optionId: string) => void;
   toggleCheck: (key: string, value: boolean) => void;
   setNote: (key: string, text: string) => void;
+  setPrintTarget: (sectionId: string | null) => void;
   reset: () => void;
   resetSection: (sectionId: string, extraKeyPrefixes?: string[]) => void;
 };
@@ -62,6 +72,7 @@ export const useProgress = create<ProgressState & Session & Actions>()(
       ...emptyProgress,
       resetCount: 0,
       sectionResets: {},
+      printTarget: null,
 
       markSeen: (sectionId, itemId) =>
         set((s) => ({
@@ -76,6 +87,8 @@ export const useProgress = create<ProgressState & Session & Actions>()(
 
       setNote: (key, text) =>
         set((s) => ({ notes: { ...s.notes, [key]: text } })),
+
+      setPrintTarget: (sectionId) => set({ printTarget: sectionId }),
 
       reset: () =>
         set((s) => ({ ...emptyProgress, resetCount: s.resetCount + 1 })),

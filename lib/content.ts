@@ -159,6 +159,8 @@ export type Task1Section = SectionBase & {
     nameLabel: string;
     namePlaceholder: string;
     exportLabel: string;
+    /** Short, filename-safe description of this deliverable — the "which task" part of every export's filename. */
+    taskLabel: string;
     signalSortTitle: string;
     matrixTitle: string;
     verdictTitle: string;
@@ -166,30 +168,63 @@ export type Task1Section = SectionBase & {
   };
 };
 
-export type DataScenario = {
+/**
+ * The trainer-tunable numbers behind Work Block #2's playground. One office
+ * only, deliberately — see Task's Control finding for why the rest of the
+ * fleet isn't countable yet. Every figure the UI shows is derived from this
+ * object, so tuning it here never drifts out of sync with the interactive
+ * meters or the exported report.
+ */
+export type WorkBlock2Config = {
   office: string;
-  model: string;
-  /** Fleet size at this one office — the only input the learner doesn't derive. */
-  units: number;
-  /** Embodied carbon per unit, kg CO2e, from the vendor's PCF datasheet. */
-  pcfPerUnit: number;
+  /** Laptop count at this one office — the only fleet number that's real. */
+  unitsInOffice: number;
+  /** Manufacturing-embodied carbon per laptop, kg CO2e. */
+  pcfPerUnitKg: number;
   pcfSource: string;
-  /** Comparison horizon in years — a common multiple of the two cycles being compared. */
-  windowYears: number;
-  note: string;
-};
-
-export type DataDraft = {
-  label: string;
-  helper: string;
-  placeholder: string;
+  cycleMin: number;
+  cycleMax: number;
+  cycleStep: number;
+  cycleDefault: number;
+  /** Residual value recovered, % of purchase price, at the shortest cycle (cycleMin). */
+  residualAtMinCyclePct: number;
+  /** Residual value recovered, % of purchase price, at the longest cycle (cycleMax). */
+  residualAtMaxCyclePct: number;
+  /**
+   * Flags "diminishing returns" once the marginal saving for one more step
+   * falls below this % of the very first step's saving — a computed knee,
+   * not an asserted year, so retuning the fleet numbers retunes the knee too.
+   */
+  diminishingReturnsThresholdPct: number;
 };
 
 export type DataSection = SectionBase & {
   id: "data";
-  scenario: DataScenario;
-  whyOnlyOneOffice: string;
-  draft: DataDraft;
+  config: WorkBlock2Config;
+  marginalLabel: string;
+  diminishingLabel: string;
+  diminishingHelp: string;
+  startingPointLabel: string;
+  lockedLabel: string;
+  lockedNote: string;
+  justification: {
+    cycleLabel: string;
+    cyclePlaceholder: string;
+    gapLabel: string;
+    gapPlaceholder: string;
+  };
+  exportLabel: string;
+  /** Short, filename-safe description of this deliverable — the "which task" part of every export's filename. */
+  taskLabel: string;
+  exportNote: {
+    watermark: string;
+    heading: string;
+    subheading: string;
+    scopeTitle: string;
+    calcTitle: string;
+    justificationTitle: string;
+    closingLine: string;
+  };
   turn: string;
 };
 
@@ -213,6 +248,50 @@ export type BlueGridSection = SectionBase & {
   horizons: Horizon[];
 };
 
+/** One reference-box source the Report Builder can pull earlier work from. */
+export type ReportReferenceKind = "task1Verdict" | "task1Gap" | "block2Number" | "block2Gap";
+
+export type ReportStep = {
+  /** Which existing NexoraComponent (n1..n7) this step drafts — the only link between memo order and site order. */
+  componentId: string;
+  caption: string;
+  reference?: ReportReferenceKind;
+  /** Generic, content-free sentence-starter shown behind "Need a clue?". */
+  clue: string;
+};
+
+export type ReportBuilderCopy = {
+  docTitle: string;
+  header: {
+    title: string;
+    toLabel: string;
+    toCaption: string;
+    toPlaceholder: string;
+    fromLabel: string;
+    fromCaption: string;
+    fromPlaceholder: string;
+    subjectLabel: string;
+    subjectCaption: string;
+    subjectPlaceholder: string;
+  };
+  clueToggleLabel: string;
+  reference: {
+    task1VerdictLabel: string;
+    task1GapLabel: string;
+    block2NumberLabel: string;
+    block2GapLabel: string;
+    task1Placeholder: string;
+    block2Placeholder: string;
+  };
+  /** In memo reading order — NOT the order `components` lists n1..n7 in. */
+  steps: ReportStep[];
+  closingLine: string;
+  exportLabel: string;
+  exportWatermark: string;
+  /** Short, filename-safe description of this deliverable — the "which task" part of every export's filename. */
+  taskLabel: string;
+};
+
 export type NexoraSection = SectionBase & {
   id: "nexora";
   seniorNote: string;
@@ -220,6 +299,7 @@ export type NexoraSection = SectionBase & {
   architectureVisual: string;
   components: NexoraComponent[];
   reflection: { title: string; questions: string[] };
+  reportBuilder: ReportBuilderCopy;
 };
 
 export type Section =
@@ -280,6 +360,16 @@ export type Day3Content = {
   roadmap: Roadmap;
   progress: { byMessages: { upTo: number; text: string }[] };
   sections: Section[];
+  /**
+   * Asked once, before any work block — every export's filename and printed
+   * header reuse this same name, so the learner never re-types it.
+   */
+  namePrompt: {
+    title: string;
+    caption: string;
+    nameLabel: string;
+    namePlaceholder: string;
+  };
   glossary: {
     title: string;
     hint: string;

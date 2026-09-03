@@ -10,13 +10,16 @@ import {
 } from "@/lib/content";
 import { Section } from "@/components/ui/Section";
 import { Opening } from "@/components/chrome/Opening";
+import { NamePrompt } from "@/components/chrome/NamePrompt";
 import { Roadmap } from "@/components/chrome/Roadmap";
 import { Basics } from "@/components/mechanics/Basics";
 import { RiskCategorizer } from "@/components/mechanics/RiskCategorizer";
-import { DataProof } from "@/components/mechanics/DataProof";
+import { CarbonPlayground } from "@/components/mechanics/CarbonPlayground";
+import { WorkBlock2Note } from "@/components/mechanics/WorkBlock2Note";
 // import { PriorityPicker } from "@/components/mechanics/PriorityPicker"; — hidden for now, keep for later use
 // import { CasePriority } from "@/components/mechanics/CasePriority"; — hidden for now, keep for later use
-import { StarterKit } from "@/components/mechanics/StarterKit";
+import { ReportBuilder } from "@/components/mechanics/ReportBuilder";
+import { NexoraNote } from "@/components/mechanics/NexoraNote";
 import { DiagnosticNoteExport } from "@/components/mechanics/DiagnosticNoteExport";
 import { SectionReset } from "@/components/chrome/SectionReset";
 import { LeafMark } from "@/components/chrome/Icons";
@@ -56,6 +59,11 @@ export default function Page() {
 
       {/* Urgency cold-open */}
       <Opening />
+
+      {/* Asked once, before any work block — every export reuses this */}
+      <div className="py-6">
+        <NamePrompt />
+      </div>
 
       {/* Bridge: why the basics are worth two minutes, before the first card */}
       <Roadmap />
@@ -107,7 +115,7 @@ export default function Page() {
         intro={dataSection.intro}
         doneRule={dataSection.doneRule}
       >
-        <DataProof section={dataSection} />
+        <CarbonPlayground section={dataSection} />
       </Section>
 
       {/* Task 2 — hidden for now, keep for later use
@@ -148,11 +156,13 @@ export default function Page() {
         intro={nexora.intro}
         doneRule={nexora.doneRule}
       >
-        <StarterKit section={nexora} diagnosisSection={task1} dataSection={dataSection} />
+        <ReportBuilder section={nexora} diagnosisSection={task1} dataSection={dataSection} />
       </Section>
       </div>
 
       <DiagnosticNoteExport section={task1} />
+      <WorkBlock2Note section={dataSection} />
+      <NexoraNote section={nexora} />
     </>
   );
 }

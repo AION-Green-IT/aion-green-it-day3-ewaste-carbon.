@@ -58,6 +58,12 @@
     "visualCaption": "Two lanes feed one skill: the mechanics tell you what a signal means, the mindset tells you what to do about it. Both have to hold before Task and the final brief will.",
     "turn": "The cards below build the vocabulary. Task turns it into a diagnosis. The final brief turns the diagnosis into a decision. Skip a stage and the next one won't hold."
   },
+  "namePrompt": {
+    "title": "Before you start",
+    "caption": "This goes on everything you export today — Task, Data and the final brief — so you only type it once.",
+    "nameLabel": "Your name",
+    "namePlaceholder": "e.g. Budi Santoso"
+  },
   "progress": {
     "byMessages": [
       { "upTo": 0, "text": "Nothing opened yet. Start with the basics, then run the first mechanic." },
@@ -296,10 +302,11 @@
         "subheading": "Diagnostic Note — Where We Are Weakest",
         "watermark": "AION Green IT · Module 2 · Day 3 · Work Block #1",
         "controlsTitle": "Export your Diagnostic Note",
-        "controlsIntro": "Everything above, laid out as one page you can save or hand in — your signal sort, your priority matrix, and the area you named. Add your name, then export.",
+        "controlsIntro": "Everything above, laid out as one page you can save or hand in — your signal sort, your priority matrix, and the area you named.",
         "nameLabel": "Submitted by",
         "namePlaceholder": "Your name",
         "exportLabel": "Export Diagnostic Note (PDF)",
+        "taskLabel": "Diagnostic Note",
         "signalSortTitle": "1 · Signal sort",
         "matrixTitle": "2 · Priority matrix",
         "verdictTitle": "3 · The area brought into the room",
@@ -309,26 +316,47 @@
     {
       "id": "data",
       "nav": "Data",
-      "kicker": "Work Block #2 · Small Data",
-      "title": "One office, one number",
-      "intro": "You named Control as the gap — but “the numbers are missing” isn't itself a number. Nexora's Singapore hub is the one office that kept a proper asset register for its laptops. That's one clean, defensible comparison, not a fleet-wide claim — just proof of method. Get it right before you write a single decision in the brief.",
-      "doneRule": "Draft your D3 evidence sentence.",
-      "scenario": {
+      "kicker": "Work Block #2 · Source Playground",
+      "title": "The lever you can actually move",
+      "intro": "Control is still broken, so you can't pull this number for Nexora's whole fleet — only for Singapore, the one office with a complete asset register. Drag the slider and feel the trade-off Source actually forces: a shorter replacement cycle doesn't cut anything, it just moves the carbon and the resale value in opposite directions. Find a cycle you can defend, then name what this number still can't tell you.",
+      "doneRule": "Recommend a cycle and name the gap it doesn't close.",
+      "config": {
         "office": "Singapore hub",
-        "model": "Nexora standard-issue laptop (Model NX-14)",
-        "units": 420,
-        "pcfPerUnit": 210,
+        "unitsInOffice": 40,
+        "pcfPerUnitKg": 350,
         "pcfSource": "vendor's published Product Carbon Footprint datasheet",
-        "windowYears": 4,
-        "note": "Every other office runs the same replacement policy — just not the same paperwork. Until Control is fixed, this is the one number you can defend."
+        "cycleMin": 2,
+        "cycleMax": 8,
+        "cycleStep": 0.5,
+        "cycleDefault": 3,
+        "residualAtMinCyclePct": 35,
+        "residualAtMaxCyclePct": 5,
+        "diminishingReturnsThresholdPct": 25
       },
-      "whyOnlyOneOffice": "This isn't Nexora's fleet-wide number — it can't be, yet. It's proof of method: one model, one office, five inputs, one defensible answer. That's what makes it usable in the room.",
-      "draft": {
-        "label": "Your D3 sentence",
-        "helper": "Tick it once you have a number to defend, then write the sentence — this is what you'll carry into the final brief.",
-        "placeholder": "D3 — [decision]. Evidence: keeping the 4-year cycle at Singapore saves ≈88.2 t CO₂e over 4 years (420 units × 210 kg CO₂e PCF) versus a 2-year cycle — the only office we can prove this for."
+      "marginalLabel": "Next half-year of extension would save",
+      "diminishingLabel": "Diminishing returns from here",
+      "diminishingHelp": "Longer cycles still cut carbon, just less and less — this step saved much less than the first half-year did. That's the maths, not a verdict on which cycle to pick.",
+      "startingPointLabel": "vs your starting point",
+      "lockedLabel": "Apply this cycle to all Nexora offices",
+      "lockedNote": "Locked — requires the device inventory and disposal records from Work Block #1 (Control) to be in place first. No figure built on Source data can be defended fleet-wide while Control stays broken. See your Work Block #1 diagnosis.",
+      "justification": {
+        "cycleLabel": "Cycle you recommend, and why",
+        "cyclePlaceholder": "Recommend ___ years because at that point annual embodied carbon reads ___ kg and residual value recovered reads ___% — cite the numbers on the meters, not just a direction.",
+        "gapLabel": "What this number does not tell us",
+        "gapPlaceholder": "This covers Singapore only — one office, one PCF figure. It says nothing about the rest of the fleet because ___ (the same gap Work Block #1 named)."
       },
-      "turn": "Carry this sentence into the final brief. D3 needs a number, not a claim — and now you have one."
+      "exportLabel": "Export report",
+      "taskLabel": "Source Playground",
+      "exportNote": {
+        "watermark": "AION Green IT · Module 2 · Day 3 · Work Block #2",
+        "heading": "Nexora Digital Services",
+        "subheading": "Source Lever — Replacement Cycle at Singapore",
+        "scopeTitle": "Scope & assumptions",
+        "calcTitle": "Calculation",
+        "justificationTitle": "Your recommendation",
+        "closingLine": "This figure covers Singapore only and cannot be scaled fleet-wide until Work Block #1's Control gap is closed."
+      },
+      "turn": "Carry the cycle you named into the final brief — D3 needs this number, not a qualitative claim."
     },
     {
       "id": "task2",
@@ -553,6 +581,75 @@
           "Where would a visible step impress outsiders while being too weak inside?",
           "Which decisions are robust long-term from the seat of a department head, architect or consultant?"
         ]
+      },
+      "reportBuilder": {
+        "docTitle": "MEMORANDUM",
+        "header": {
+          "title": "Memo header",
+          "toLabel": "To",
+          "toCaption": "Whoever actually has the authority to approve these three decisions — not a general audience.",
+          "toPlaceholder": "e.g. Nexora's CFO and Head of IT",
+          "fromLabel": "From",
+          "fromCaption": "Your title in this case, not your real name.",
+          "fromPlaceholder": "e.g. IT-Governance Lead / Sustainability Consultant",
+          "subjectLabel": "Subject",
+          "subjectCaption": "What does the reader need to know before they even open this?",
+          "subjectPlaceholder": "e.g. Closing Nexora's e-waste and carbon reporting gap — three decisions for the next 12 months"
+        },
+        "clueToggleLabel": "Need a clue?",
+        "reference": {
+          "task1VerdictLabel": "Your Work Block #1 finding:",
+          "task1GapLabel": "Still missing, per Work Block #1:",
+          "block2NumberLabel": "Your Work Block #2 number:",
+          "block2GapLabel": "From your Work Block #2 note:",
+          "task1Placeholder": "Complete Work Block #1 first.",
+          "block2Placeholder": "Complete Work Block #2 first."
+        },
+        "steps": [
+          {
+            "componentId": "n1",
+            "caption": "Argue in terms of revenue, legal exposure, or reputation — not sustainability in the abstract. Why does the board need to care by Friday, not eventually?",
+            "clue": "This matters now because [business consequence], and waiting costs Nexora [specific exposure] by [timeframe]."
+          },
+          {
+            "componentId": "n2",
+            "caption": "Name exactly three. Order them — a list in random order reads as junior. Each one should trace back to something specific you found, not a generic best practice.",
+            "reference": "task1Verdict",
+            "clue": "D1: [decision], because [specific finding]. D2: [decision], because [specific finding]. D3: [decision], because [the number you found]."
+          },
+          {
+            "componentId": "n7",
+            "caption": "Only list what's reversible or reduces risk today. Anything that needs data you don't have yet belongs in a later decision, not this one.",
+            "reference": "task1Gap",
+            "clue": "Even without [the missing data], we can decide [action] now because it's reversible and reduces [specific risk]."
+          },
+          {
+            "componentId": "n5",
+            "caption": "Say what the first 30 days costs you — not just what it produces. A path with no downside hasn't been thought through.",
+            "reference": "block2Number",
+            "clue": "The first 30 days: [action]. It costs [specific cost or effort]. It produces [specific output]."
+          },
+          {
+            "componentId": "n3",
+            "caption": "State the test you used to order your decisions — not just ‘biggest impact first.’ A senior answer can explain why the order isn't obvious.",
+            "clue": "We prioritised by [the test], not by [the obvious alternative], because [reason the obvious choice would have been wrong]."
+          },
+          {
+            "componentId": "n4",
+            "caption": "A real conflict has two sides that are both legitimate. If your next sentence resolves it, it isn't a conflict yet — it's a decision you've already made.",
+            "reference": "block2Gap",
+            "clue": "One side wants [X] because [reason]. The other side wants [Y] because [reason]. Both are reasonable, so the real question is [what tips it]."
+          },
+          {
+            "componentId": "n6",
+            "caption": "Name one accountable person, not a committee. State how often this gets reviewed — ‘ongoing’ is not a cadence.",
+            "clue": "[Named role] owns this. Data flows from [source] to [destination]. It's reviewed every [specific cadence]."
+          }
+        ],
+        "closingLine": "This is what you bring into the room Friday.",
+        "exportLabel": "Export memo (PDF)",
+        "exportWatermark": "AION Green IT · Module 2 · Day 3 · Work Block #3",
+        "taskLabel": "Management Memo"
       }
     }
   ],

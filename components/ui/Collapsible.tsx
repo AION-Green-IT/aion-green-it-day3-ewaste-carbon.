@@ -9,19 +9,27 @@ export function Collapsible({
   children,
   defaultOpen = false,
   className,
+  onOpenChange,
 }: {
   summary: ReactNode;
   children: ReactNode;
   defaultOpen?: boolean;
   className?: string;
+  /** Fires with the new open state whenever the toggle is clicked. */
+  onOpenChange?: (open: boolean) => void;
 }) {
   const [open, setOpen] = useState(defaultOpen);
+  const toggle = () => {
+    const next = !open;
+    setOpen(next);
+    onOpenChange?.(next);
+  };
   return (
     <div className={className}>
       <button
         type="button"
         aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
+        onClick={toggle}
         className="flex w-full items-center gap-2 text-left"
       >
         <span
