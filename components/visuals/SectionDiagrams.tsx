@@ -142,3 +142,158 @@ export function ArchitectureDiagram({
     </svg>
   );
 }
+
+/* Block 2 — the one defensible comparison: 2-year vs 4-year replacement cycle,
+   embodied CO2e only, for the one office with a complete asset register. */
+export function CarbonCompareDiagram({
+  className,
+  office,
+  units,
+  pcfPerUnit,
+  windowYears,
+}: DiagramProps & {
+  office: string;
+  units: number;
+  pcfPerUnit: number;
+  windowYears: number;
+}) {
+  const reps2 = windowYears / 2;
+  const reps4 = windowYears / 4;
+  const t2 = (units * pcfPerUnit * reps2) / 1000;
+  const t4 = (units * pcfPerUnit * reps4) / 1000;
+  const diff = t2 - t4;
+  const maxT = Math.max(t2, t4);
+  const barHeight = (v: number) => (v / maxT) * 118;
+  const base = 172;
+  const bars = [
+    { x: 56, w: 74, v: t2, label: "Every 2 years", color: C.danger },
+    { x: 190, w: 74, v: t4, label: "Every 4 years", color: C.good },
+  ];
+  return (
+    <svg
+      viewBox="0 0 320 220"
+      className={className ?? wrap}
+      role="img"
+      aria-label={`Embodied CO2e over ${windowYears} years at ${office}: ${t2.toFixed(1)} tonnes on a 2-year replacement cycle versus ${t4.toFixed(1)} tonnes on a 4-year cycle`}
+    >
+      <text x="160" y="18" textAnchor="middle" fontSize="10" fontWeight="700" fill={C.purple} fontFamily="inherit">
+        Embodied CO₂e, {windowYears}-year window — {office}
+      </text>
+      <line x1="26" y1={base} x2="294" y2={base} stroke={C.line} strokeWidth="1.5" />
+      {bars.map((b) => {
+        const h = barHeight(b.v);
+        return (
+          <g key={b.label}>
+            <rect x={b.x} y={base - h} width={b.w} height={h} rx="6" fill={b.color} opacity="0.85" />
+            <text x={b.x + b.w / 2} y={base - h - 10} textAnchor="middle" fontSize="13" fontWeight="700" fill={C.ink} fontFamily="inherit">
+              {b.v.toFixed(1)} t
+            </text>
+            <text x={b.x + b.w / 2} y={base + 18} textAnchor="middle" fontSize="10" fill={C.ash} fontFamily="inherit">
+              {b.label}
+            </text>
+          </g>
+        );
+      })}
+      <text x="160" y="205" textAnchor="middle" fontSize="10.5" fontWeight="700" fill={C.navy} fontFamily="inherit">
+        Δ {diff.toFixed(1)} t CO₂e — halving the cycle roughly doubles it
+      </text>
+    </svg>
+  );
+}
+
+/* Task — the priority matrix: carbon impact vs readiness to act, plotted by
+   signal. Reused for the learner's live matrix and the revealed model one;
+   dots at the same cell spread out so overlapping signals stay legible. */
+export type QuadrantDot = {
+  id: string;
+  label: string;
+  x: "low" | "high";
+  y: "low" | "high" | "either";
+  color: string;
+};
+
+export function QuadrantDiagram({
+  className,
+  dots,
+  xLabel,
+  yLabel,
+  zoneLabels,
+}: DiagramProps & {
+  dots: QuadrantDot[];
+  xLabel: string;
+  yLabel: string;
+  zoneLabels: {
+    topLeft: string;
+    topRight: string;
+    bottomLeft: string;
+    bottomRight: string;
+  };
+}) {
+  const left = 46;
+  const right = 318;
+  const top = 22;
+  const bottom = 244;
+  const midX = (left + right) / 2;
+  const midY = (top + bottom) / 2;
+
+  const xPos = (v: QuadrantDot["x"]) =>
+    v === "low" ? left + (midX - left) / 2 : midX + (right - midX) / 2;
+  const yPos = (v: QuadrantDot["y"]) =>
+    v === "high" ? top + (midY - top) / 2 : v === "low" ? midY + (bottom - midY) / 2 : midY;
+
+  // Cluster dots landing on the same cell and spread them so labels stay readable.
+  const groups = new Map<string, QuadrantDot[]>();
+  dots.forEach((d) => {
+    const key = `${d.x}:${d.y}`;
+    groups.set(key, [...(groups.get(key) ?? []), d]);
+  });
+  const placed = dots.map((d) => {
+    const group = groups.get(`${d.x}:${d.y}`)!;
+    const i = group.findIndex((g) => g.id === d.id);
+    const offset = (i - (group.length - 1) / 2) * 20;
+    return { ...d, cx: xPos(d.x) + offset, cy: yPos(d.y) };
+  });
+
+  return (
+    <svg
+      viewBox="0 0 340 300"
+      className={className ?? wrap}
+      role="img"
+      aria-label={`A quadrant of carbon impact against readiness to act, with ${dots.length} signal${dots.length === 1 ? "" : "s"} plotted`}
+    >
+      <rect x={left} y={top} width={right - left} height={bottom - top} fill="none" stroke={C.line} strokeWidth="1.5" />
+      <line x1={midX} y1={top} x2={midX} y2={bottom} stroke={C.line} strokeWidth="1.2" strokeDasharray="4 4" />
+      <line x1={left} y1={midY} x2={right} y2={midY} stroke={C.line} strokeWidth="1.2" strokeDasharray="4 4" />
+
+      <text x={left + 6} y={top + 15} fontSize="8.5" fontWeight="700" fill={C.ash} fontFamily="inherit">{zoneLabels.topLeft}</text>
+      <text x={right - 6} y={top + 15} textAnchor="end" fontSize="8.5" fontWeight="700" fill={C.ash} fontFamily="inherit">{zoneLabels.topRight}</text>
+      <text x={left + 6} y={bottom - 7} fontSize="8.5" fontWeight="700" fill={C.ash} fontFamily="inherit">{zoneLabels.bottomLeft}</text>
+      <text x={right - 6} y={bottom - 7} textAnchor="end" fontSize="8.5" fontWeight="700" fill={C.ash} fontFamily="inherit">{zoneLabels.bottomRight}</text>
+
+      {placed.map((d) => (
+        <g key={d.id}>
+          <circle cx={d.cx} cy={d.cy} r="11" fill={d.color} stroke={C.paper} strokeWidth="1.5" />
+          <text x={d.cx} y={d.cy + 3.5} textAnchor="middle" fontSize="10" fontWeight="700" fill={d.color === C.control ? C.navy : C.paper} fontFamily="inherit">
+            {d.label}
+          </text>
+        </g>
+      ))}
+
+      <text x={(left + right) / 2} y={bottom + 26} textAnchor="middle" fontSize="10" fontWeight="700" fill={C.ink} fontFamily="inherit">
+        {xLabel} →
+      </text>
+      <text
+        x={16}
+        y={(top + bottom) / 2}
+        textAnchor="middle"
+        fontSize="10"
+        fontWeight="700"
+        fill={C.ink}
+        fontFamily="inherit"
+        transform={`rotate(-90 16 ${(top + bottom) / 2})`}
+      >
+        {yLabel} →
+      </text>
+    </svg>
+  );
+}

@@ -31,6 +31,9 @@ export type RiskCategory = {
   hex: string;
 };
 
+/** Low/high toggle answer; "either" is only valid for a model answer key. */
+export type QuadrantLevel = "low" | "high" | "either";
+
 export type Clue = {
   id: string;
   text: string;
@@ -39,6 +42,10 @@ export type Clue = {
   weak: boolean;
   explain: string;
   why: string;
+  /** Model answer key for the priority-matrix follow-up — carbon impact if fixed. */
+  modelCarbon: QuadrantLevel;
+  /** Model answer key — readiness to act on it today. */
+  modelReadiness: QuadrantLevel;
 };
 
 export type Diagnosis = {
@@ -47,6 +54,30 @@ export type Diagnosis = {
   correct: string;
   correctVerdict: string;
   incorrectVerdict: string;
+};
+
+/** Copy for the priority-matrix mini-game that follows the signal sort. */
+export type QuadrantCopy = {
+  title: string;
+  intro: string;
+  carbonQuestion: string;
+  readinessQuestion: string;
+  low: string;
+  high: string;
+  xLabel: string;
+  yLabel: string;
+  zoneLabels: {
+    topLeft: string;
+    topRight: string;
+    bottomLeft: string;
+    bottomRight: string;
+  };
+  compareLabel: string;
+  compareLocked: string;
+  yourTitle: string;
+  modelTitle: string;
+  modelInsight: string;
+  eitherNote: string;
 };
 
 export type Consequence = {
@@ -86,7 +117,7 @@ export type NexoraComponent = {
   pillar: string;
 };
 
-export type SectionId = "basics" | "task1" | "task2" | "bluegrid" | "nexora";
+export type SectionId = "basics" | "task1" | "data" | "task2" | "bluegrid" | "nexora";
 
 type SectionBase = {
   id: SectionId;
@@ -118,6 +149,48 @@ export type Task1Section = SectionBase & {
   clues: Clue[];
   /** The synthesis step: which one area the sorted evidence actually points to. Its pick is carried forward as input to the next task. */
   diagnosis: Diagnosis;
+  quadrant: QuadrantCopy;
+  exportNote: {
+    heading: string;
+    subheading: string;
+    watermark: string;
+    controlsTitle: string;
+    controlsIntro: string;
+    nameLabel: string;
+    namePlaceholder: string;
+    exportLabel: string;
+    signalSortTitle: string;
+    matrixTitle: string;
+    verdictTitle: string;
+    notCompleted: string;
+  };
+};
+
+export type DataScenario = {
+  office: string;
+  model: string;
+  /** Fleet size at this one office — the only input the learner doesn't derive. */
+  units: number;
+  /** Embodied carbon per unit, kg CO2e, from the vendor's PCF datasheet. */
+  pcfPerUnit: number;
+  pcfSource: string;
+  /** Comparison horizon in years — a common multiple of the two cycles being compared. */
+  windowYears: number;
+  note: string;
+};
+
+export type DataDraft = {
+  label: string;
+  helper: string;
+  placeholder: string;
+};
+
+export type DataSection = SectionBase & {
+  id: "data";
+  scenario: DataScenario;
+  whyOnlyOneOffice: string;
+  draft: DataDraft;
+  turn: string;
 };
 
 export type Task2Section = SectionBase & {
@@ -152,6 +225,7 @@ export type NexoraSection = SectionBase & {
 export type Section =
   | BasicsSection
   | Task1Section
+  | DataSection
   | Task2Section
   | BlueGridSection
   | NexoraSection;
@@ -169,6 +243,29 @@ export type Opening = {
   stakes: Stake[];
 };
 
+export type LiteracyFact = {
+  stat: string;
+  label: string;
+  detail: string;
+  source: string;
+};
+
+/**
+ * The bridge between the cold-open and Basics: why the concepts below are
+ * worth the learner's time, grounded in real numbers, before they open one.
+ */
+export type Roadmap = {
+  kicker: string;
+  title: string;
+  intro: string;
+  facts: LiteracyFact[];
+  factsNote: string;
+  /** Key into the visual registry (components/visuals). */
+  visual: string;
+  visualCaption: string;
+  turn: string;
+};
+
 export type Day3Content = {
   meta: {
     module: string;
@@ -180,6 +277,7 @@ export type Day3Content = {
     footerLine: string;
   };
   opening: Opening;
+  roadmap: Roadmap;
   progress: { byMessages: { upTo: number; text: string }[] };
   sections: Section[];
   glossary: {
@@ -201,6 +299,7 @@ export function getSection<T extends Section>(id: T["id"]): T {
 export const SECTION_ORDER: SectionId[] = [
   "basics",
   "task1",
+  "data",
   // "task2", — hidden for now, keep in content.day3.json for later use
   // "bluegrid", — hidden for now, keep in content.day3.json for later use
   "nexora",

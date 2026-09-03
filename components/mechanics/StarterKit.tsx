@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import type { NexoraComponent, NexoraSection, Task1Section } from "@/lib/content";
+import type { DataSection, NexoraComponent, NexoraSection, Task1Section } from "@/lib/content";
 import { useHydrated, useProgress } from "@/lib/store";
 import { ArchitectureDiagram } from "@/components/visuals/SectionDiagrams";
 import { Explainer } from "@/components/ui/Explainer";
@@ -9,10 +9,13 @@ import { Explainer } from "@/components/ui/Explainer";
 export function StarterKit({
   section,
   diagnosisSection,
+  dataSection,
 }: {
   section: NexoraSection;
   /** The Task section whose diagnosis pick feeds in as this section's starting condition. */
   diagnosisSection: Task1Section;
+  /** Block 2's scenario, so D3 has a number to quote instead of a guess. */
+  dataSection: DataSection;
 }) {
   const hydrated = useHydrated();
   const checks = useProgress((s) => s.checks);
@@ -45,7 +48,10 @@ export function StarterKit({
 
       <ol className="space-y-3">
         {section.components.map((c) => (
-          <ComponentRow key={c.id} component={c} />
+          <li key={c.id} className="space-y-3">
+            {c.id === "n2" ? <DataCarryover section={dataSection} /> : null}
+            <ComponentRow component={c} />
+          </li>
         ))}
       </ol>
 
@@ -80,7 +86,7 @@ function ComponentRow({ component }: { component: NexoraComponent }) {
   const isChecked = hydrated && checked;
 
   return (
-    <li
+    <div
       className={clsx(
         "card p-4 transition-colors duration-200",
         isChecked && "border-good/40 bg-good/5",
@@ -121,7 +127,7 @@ function ComponentRow({ component }: { component: NexoraComponent }) {
           </label>
         </div>
       </div>
-    </li>
+    </div>
   );
 }
 
@@ -151,6 +157,49 @@ function DiagnosisCarryover({ section }: { section: Task1Section }) {
         where Nexora is weakest — {area.blurb.toLowerCase()} Let that pressure-test
         which components below you push hardest.
       </p>
+    </div>
+  );
+}
+
+/**
+ * Reads Block 2's fixed scenario and the learner's own saved D3 sentence, so
+ * the number is sitting right above the field it must be quoted in. The
+ * comparison is deterministic (same five inputs every time), so this shows
+ * once the learner has ticked Block 2's draft as done — no correctness gate
+ * needed, unlike the Task diagnosis.
+ */
+function DataCarryover({ section }: { section: DataSection }) {
+  const hydrated = useHydrated();
+  const done = useProgress((s) => s.checks["data:d3"] ?? false);
+  const note = useProgress((s) => s.notes["data:d3"] ?? "");
+
+  if (!hydrated || !done) return null;
+
+  const { scenario } = section;
+  const reps2 = scenario.windowYears / 2;
+  const reps4 = scenario.windowYears / 4;
+  const t2 = (scenario.units * scenario.pcfPerUnit * reps2) / 1000;
+  const t4 = (scenario.units * scenario.pcfPerUnit * reps4) / 1000;
+  const diff = t2 - t4;
+
+  return (
+    <div className="rounded-2xl border-l-4 border-purple bg-lilac/30 p-4">
+      <p className="text-caption font-semibold uppercase tracking-wide text-purple">
+        Carried in from Block 2
+      </p>
+      <p className="mt-1 text-body text-ink">
+        Your number for D3:{" "}
+        <span className="font-semibold">{diff.toFixed(1)} t CO₂e</span> over{" "}
+        {scenario.windowYears} years at {scenario.office} (
+        {scenario.units} units × {scenario.pcfPerUnit} kg CO₂e PCF, 2-year vs
+        4-year cycle). Quote it — don&rsquo;t re-derive it.
+      </p>
+      {note ? (
+        <p className="mt-2 rounded-xl border border-line bg-paper p-3 text-body text-ash">
+          <span className="font-semibold text-ink">Your draft: </span>
+          {note}
+        </p>
+      ) : null}
     </div>
   );
 }

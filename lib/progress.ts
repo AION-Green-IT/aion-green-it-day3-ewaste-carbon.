@@ -55,6 +55,8 @@ export function useSectionStatuses(): {
       done: (seen.task1 ?? []).length + (choices.task1 ? 1 : 0),
       total: task1.clues.length + 1,
     },
+    // Ticked once the learner has a number to defend and has drafted D3.
+    data: { done: checks["data:d3"] ? 1 : 0, total: 1 },
     // A single pick completes the mechanic.
     task2: { done: choices.task2 ? 1 : 0, total: 1 },
     bluegrid: { done: choices.bluegrid ? 1 : 0, total: 1 },

@@ -1,11 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import clsx from "clsx";
-import type { Clue, RiskCategory, Task1Section } from "@/lib/content";
+import type { Clue, QuadrantCopy, RiskCategory, Task1Section } from "@/lib/content";
 import { useHydrated, useProgress } from "@/lib/store";
-import { AreasLifecycleDiagram } from "@/components/visuals/SectionDiagrams";
+import { AreasLifecycleDiagram, QuadrantDiagram } from "@/components/visuals/SectionDiagrams";
 import { Explainer } from "@/components/ui/Explainer";
+import {
+  allToggled as computeAllToggled,
+  liveQuadrantDots,
+  modelQuadrantDots,
+} from "@/lib/quadrant";
 
 export function RiskCategorizer({ section }: { section: Task1Section }) {
   const byCode = Object.fromEntries(
@@ -21,6 +25,16 @@ export function RiskCategorizer({ section }: { section: Task1Section }) {
   const hydrated = useHydrated();
   const seenCount = useProgress((s) => (s.seen[section.id] ?? []).length);
   const allSorted = hydrated && seenCount >= section.clues.length;
+
+  // The priority matrix: a dot per signal, plotted the moment its two
+  // follow-up toggles are both answered. Colour follows whichever area the
+  // learner actually picked for that signal — their read, not the answer key.
+  const choices = useProgress((s) => s.choices);
+  const choose = useProgress((s) => s.choose);
+  const liveDots = hydrated ? liveQuadrantDots(section.clues, choices, byCode) : [];
+  const modelDots = modelQuadrantDots(section.clues, byCode);
+  const allToggled = hydrated && computeAllToggled(section.clues, choices);
+  const compared = hydrated && choices["task1:compared"] === "yes";
 
   return (
     <div className="space-y-6">
@@ -57,13 +71,78 @@ export function RiskCategorizer({ section }: { section: Task1Section }) {
             index={i}
             categories={section.categories}
             byCode={byCode}
+            quadrant={section.quadrant}
           />
         ))}
       </ol>
 
+      {/* Live priority matrix — persistent, fills in as toggles are answered. */}
+      <div key={`matrix-${round}`} className="card p-4">
+        <p className="text-h3 text-ink">{section.quadrant.title}</p>
+        <p className="mt-1 text-body text-ash">{section.quadrant.intro}</p>
+        <div className="mx-auto mt-3 max-w-sm">
+          <QuadrantDiagram
+            dots={liveDots}
+            xLabel={section.quadrant.xLabel}
+            yLabel={section.quadrant.yLabel}
+            zoneLabels={section.quadrant.zoneLabels}
+          />
+        </div>
+      </div>
+
       {allSorted ? (
         <DiagnosisPicker key={`diagnosis-${round}`} section={section} />
       ) : null}
+
+      {/* Debrief: the model matrix only appears once every signal is fully
+          weighed, and only after the learner actively asks to compare. */}
+      <div key={`compare-${round}`} className="card border-l-4 border-purple p-4">
+        <p className="text-h3 text-ink">{section.quadrant.compareLabel}</p>
+        {!allToggled ? (
+          <p className="mt-2 text-body text-ash">{section.quadrant.compareLocked}</p>
+        ) : !compared ? (
+          <button
+            type="button"
+            onClick={() => choose("task1:compared", "yes")}
+            className="mt-3 rounded-xl bg-purple px-4 py-2 text-body font-semibold text-paper transition-colors duration-200 hover:bg-navy"
+          >
+            {section.quadrant.compareLabel}
+          </button>
+        ) : (
+          <div className="reveal-in mt-3 space-y-4">
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div>
+                <p className="mb-2 text-center text-caption font-semibold uppercase tracking-wide text-ash">
+                  {section.quadrant.yourTitle}
+                </p>
+                <QuadrantDiagram
+                  dots={liveDots}
+                  xLabel={section.quadrant.xLabel}
+                  yLabel={section.quadrant.yLabel}
+                  zoneLabels={section.quadrant.zoneLabels}
+                />
+              </div>
+              <div>
+                <p className="mb-2 text-center text-caption font-semibold uppercase tracking-wide text-purple">
+                  {section.quadrant.modelTitle}
+                </p>
+                <QuadrantDiagram
+                  dots={modelDots}
+                  xLabel={section.quadrant.xLabel}
+                  yLabel={section.quadrant.yLabel}
+                  zoneLabels={section.quadrant.zoneLabels}
+                />
+              </div>
+            </div>
+            <p className="text-caption text-ash">{section.quadrant.eitherNote}</p>
+            <p className="rounded-xl border-l-4 border-navy bg-lilac/50 p-3 text-body text-navy">
+              {section.quadrant.modelInsight}
+            </p>
+          </div>
+        )}
+      </div>
+
+      <ExportControls section={section} />
     </div>
   );
 }
@@ -73,21 +152,28 @@ function ClueRow({
   index,
   categories,
   byCode,
+  quadrant,
 }: {
   clue: Clue;
   index: number;
   categories: RiskCategory[];
   byCode: Record<string, RiskCategory>;
+  quadrant: QuadrantCopy;
 }) {
+  const hydrated = useHydrated();
   const markSeen = useProgress((s) => s.markSeen);
-  const [chosen, setChosen] = useState<string | null>(null);
+  const choose = useProgress((s) => s.choose);
+  const chosenCode = useProgress((s) => s.choices[`${clue.id}:category`]) ?? null;
+  const carbon = useProgress((s) => s.choices[`${clue.id}:carbon`]) ?? null;
+  const readiness = useProgress((s) => s.choices[`${clue.id}:readiness`]) ?? null;
+  const chosen = hydrated ? chosenCode : null;
   const revealed = chosen !== null;
   const answer = byCode[clue.answer];
   const matched = chosen === clue.answer;
 
   const pick = (code: string) => {
     if (revealed) return;
-    setChosen(code);
+    choose(`${clue.id}:category`, code);
     markSeen("task1", clue.id);
   };
 
@@ -148,9 +234,66 @@ function ClueRow({
             <span className="font-semibold">Why this matters: </span>
             {clue.why}
           </p>
+
+          <div className="space-y-2.5 border-t border-line pt-3">
+            <ToggleQuestion
+              question={quadrant.carbonQuestion}
+              lowLabel={quadrant.low}
+              highLabel={quadrant.high}
+              value={hydrated ? (carbon as "low" | "high" | null) : null}
+              onPick={(v) => choose(`${clue.id}:carbon`, v)}
+            />
+            <ToggleQuestion
+              question={quadrant.readinessQuestion}
+              lowLabel={quadrant.low}
+              highLabel={quadrant.high}
+              value={hydrated ? (readiness as "low" | "high" | null) : null}
+              onPick={(v) => choose(`${clue.id}:readiness`, v)}
+            />
+          </div>
         </div>
       )}
     </li>
+  );
+}
+
+/** One Low/High follow-up question. Never marked right or wrong — matches
+ *  the "nothing is scored" sort above it. */
+function ToggleQuestion({
+  question,
+  lowLabel,
+  highLabel,
+  value,
+  onPick,
+}: {
+  question: string;
+  lowLabel: string;
+  highLabel: string;
+  value: "low" | "high" | null;
+  onPick: (value: "low" | "high") => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <p className="min-w-[200px] flex-1 text-caption text-ash">{question}</p>
+      <div className="flex gap-1.5">
+        {(["low", "high"] as const).map((lvl) => (
+          <button
+            key={lvl}
+            type="button"
+            aria-pressed={value === lvl}
+            onClick={() => onPick(lvl)}
+            className={clsx(
+              "rounded-lg border px-3 py-1 text-caption font-semibold transition-colors duration-200",
+              value === lvl
+                ? "border-purple bg-purple text-paper"
+                : "border-line text-navy hover:bg-lilac",
+            )}
+          >
+            {lvl === "low" ? lowLabel : highLabel}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -217,6 +360,47 @@ function DiagnosisPicker({ section }: { section: Task1Section }) {
           </p>
         </div>
       ) : null}
+    </div>
+  );
+}
+
+/**
+ * On-screen only (the printable note itself lives in DiagnosticNoteExport,
+ * rendered separately so it can escape the normal page's print:hidden
+ * wrapper). A name field plus a button that hands off to the browser's own
+ * print dialog — "Save as PDF" needs no library and nothing leaves the
+ * device.
+ */
+function ExportControls({ section }: { section: Task1Section }) {
+  const hydrated = useHydrated();
+  const name = useProgress((s) => s.notes["task1:name"] ?? "");
+  const setNote = useProgress((s) => s.setNote);
+
+  return (
+    <div className="card p-4">
+      <p className="text-h3 text-ink">{section.exportNote.controlsTitle}</p>
+      <p className="mt-1 text-body text-ash">{section.exportNote.controlsIntro}</p>
+
+      <label className="mt-3 block max-w-xs">
+        <span className="mb-1 block text-caption font-semibold uppercase tracking-wide text-ash">
+          {section.exportNote.nameLabel}
+        </span>
+        <input
+          type="text"
+          value={hydrated ? name : ""}
+          onChange={(e) => setNote("task1:name", e.target.value)}
+          placeholder={section.exportNote.namePlaceholder}
+          className="w-full rounded-xl border border-line bg-paper p-2.5 text-body text-ink placeholder:text-ash/70 focus:border-purple"
+        />
+      </label>
+
+      <button
+        type="button"
+        onClick={() => window.print()}
+        className="mt-4 rounded-xl bg-navy px-4 py-2 text-body font-semibold text-paper transition-colors duration-200 hover:bg-purple"
+      >
+        {section.exportNote.exportLabel}
+      </button>
     </div>
   );
 }

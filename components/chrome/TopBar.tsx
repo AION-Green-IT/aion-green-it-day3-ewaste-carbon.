@@ -16,7 +16,7 @@ export function TopBar() {
   const shownComplete = hydrated ? completeCount : 0;
 
   return (
-    <header className="sticky top-0 z-30 bg-navy text-paper">
+    <header className="sticky top-0 z-30 bg-navy text-paper print:hidden">
       <div className="mx-auto w-full max-w-[1100px] px-4 py-3 md:px-6">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
           <div className="flex min-w-0 items-center gap-3">

@@ -72,3 +72,23 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/*
+ * Printing a Diagnostic Note: `.print-note` is display:none on screen and
+ * only appears for print, while everything else (`print:hidden` on the
+ * TopBar, Footer and the normal page body) collapses to nothing — plain
+ * display toggling, no absolute-position/visibility tricks that leave a
+ * trail of blank pages behind a long scrolling page.
+ */
+.print-note {
+  display: none;
+}
+
+@media print {
+  .print-note {
+    display: block;
+  }
+  @page {
+    margin: 16mm;
+  }
+}

@@ -17,10 +17,13 @@ export function SectionReset({
   sectionId,
   label,
   note,
+  extraKeyPrefixes,
 }: {
   sectionId: SectionId;
   label: string;
   note: string;
+  /** Compound-key prefixes to sweep alongside the plain sectionId — see resetSection. */
+  extraKeyPrefixes?: string[];
 }) {
   const hydrated = useHydrated();
   const resetSection = useProgress((s) => s.resetSection);
@@ -32,7 +35,7 @@ export function SectionReset({
   return (
     <button
       type="button"
-      onClick={() => resetSection(sectionId)}
+      onClick={() => resetSection(sectionId, extraKeyPrefixes)}
       title={note}
       aria-label={`${label}. ${note}`}
       className="rounded-xl border border-line px-3 py-1.5 text-caption text-navy transition-colors duration-200 hover:bg-lilac hover:underline"

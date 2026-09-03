@@ -4,7 +4,7 @@ import { Collapsible } from "@/components/ui/Collapsible";
 export function Footer() {
   const { glossary } = content;
   return (
-    <footer className="mt-16 border-t border-line">
+    <footer className="mt-16 border-t border-line print:hidden">
       <div className="mx-auto w-full max-w-[1100px] px-4 py-8 md:px-6">
         <Collapsible
           summary={

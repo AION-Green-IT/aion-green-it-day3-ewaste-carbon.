@@ -7,6 +7,7 @@ import {
   LifecycleDiagram,
   SteerDiagram,
   ConnectionsMap,
+  LiteracyRoadmapDiagram,
 } from "./BasicsDiagrams";
 
 // Maps a content `visual` string to its diagram. Only the no-props (data-free)
@@ -20,6 +21,7 @@ const REGISTRY: Record<string, (p: DiagramProps) => JSX.Element> = {
   lifecycle: LifecycleDiagram,
   steer: SteerDiagram,
   connections: ConnectionsMap,
+  literacyRoadmap: LiteracyRoadmapDiagram,
 };
 
 export function Diagram({ name, className }: { name: string; className?: string }) {

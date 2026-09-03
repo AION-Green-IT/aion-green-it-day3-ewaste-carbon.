@@ -10,18 +10,18 @@
   },
   "opening": {
     "kicker": "Why this, and why now",
-    "scene": "Monday, 09:14. Your largest client's procurement lead wants two things attached to this quarter's re-tender: your IT carbon figures, and proof that retired devices are handled responsibly. Your team has neither the numbers nor the paper trail — and the deadline is Friday.",
-    "turn": "No slogan fixes this. Today builds the two things that do: numbers you can defend, and decisions that hold up. Work the four blocks below — each one hands you part of the answer.",
+    "scene": "Monday, 09:14. Nexora Digital Services just found out its biggest client's procurement lead is attaching two new conditions to this quarter's re-tender: defensible IT carbon figures, and proof that retired devices are handled responsibly. Nexora's Head of IT has neither — and Friday is the deadline. She calls you: not to fix it yet, just to tell her, honestly, where it's actually broken.",
+    "turn": "No slogan fixes this, and you haven't been hired to write one. Before Nexora trusts you with the real proposal, they want to see you find the actual problem first. Work the blocks below — the last one decides whether you get the room.",
     "stakes": [
       {
         "icon": "contract",
         "label": "The deal",
-        "text": "Tenders and key accounts now ask for IT carbon and disposal proof. “We don't track that” can lose the contract."
+        "text": "Nexora's tenders and key accounts now ask for IT carbon and disposal proof. “We don't track that” can lose the contract."
       },
       {
         "icon": "shield",
         "label": "The law",
-        "text": "Reporting duties and data-protection rules follow every device that leaves the building, documented or not."
+        "text": "Reporting duties and data-protection rules follow every device that leaves Nexora's building, documented or not."
       },
       {
         "icon": "coins",
@@ -34,6 +34,29 @@
         "text": "A visible but hollow “green” move is exposed the moment anyone audits it — worse than doing nothing."
       }
     ]
+  },
+  "roadmap": {
+    "kicker": "Before you open a single card",
+    "title": "Two kinds of literacy this brief is testing",
+    "intro": "Nexora didn't just ask for numbers — it asked for a defensible answer. That takes two things most people only have one of: knowing what these terms actually mean, and knowing how to turn them into a decision leadership will act on. The cards below build the first. Task and the final brief demand the second.",
+    "facts": [
+      {
+        "stat": "62M tonnes",
+        "label": "e-waste, worldwide, 2022",
+        "detail": "Only 22.3% of it was formally collected and recycled — and the pile is growing five times faster than recycling capacity.",
+        "source": "UN Global E-waste Monitor, 2024"
+      },
+      {
+        "stat": "~80%",
+        "label": "of a laptop's lifetime carbon",
+        "detail": "is already spent before it's unboxed — in manufacturing, not daily use. “Turn off your monitor” barely moves the number that matters.",
+        "source": "lifecycle studies behind GHG Protocol Scope 3 guidance"
+      }
+    ],
+    "factsNote": "Neither number is about Nexora specifically. Both are why a client asks at all — and why “we recycle” or “we're efficient” won't be enough of an answer on their own.",
+    "visual": "literacyRoadmap",
+    "visualCaption": "Two lanes feed one skill: the mechanics tell you what a signal means, the mindset tells you what to do about it. Both have to hold before Task and the final brief will.",
+    "turn": "The cards below build the vocabulary. Task turns it into a diagnosis. The final brief turns the diagnosis into a decision. Skip a stage and the next one won't hold."
   },
   "progress": {
     "byMessages": [
@@ -142,7 +165,7 @@
       "nav": "Task",
       "kicker": "Work Block #1 · Task",
       "title": "Where is Nexora weakest? — Nexora Digital Services",
-      "intro": "You are the IT-governance lead / sustainability consultant for Nexora Digital Services: growing internationally, large device volumes, hybrid IT, mounting pressure to make the old-device inventory and CO₂ impact traceable — with no consistent steering model yet. Before you can propose anything, you need to know where it actually hurts. Sort every signal into Source, Cycle or Control — some are the real weak spot, others just look alarming. Name the one area you'd bring into the room, because that call carries into the work ahead.",
+      "intro": "You're not on the payroll yet. Nexora's Head of IT gave you one afternoon, a pile of scattered notes on how the company buys, uses and retires its devices — and one ask: tell her where it actually hurts, not where it looks alarming. Sort every signal into Source, Cycle or Control. Some are the real weak spot; the rest are noise that sounds worse than it is. Name the one area you'd bring into the room — that call is what gets you hired for the work ahead.",
       "doneRule": "Sort every signal, then name the weak spot.",
       "resetLabel": "Diagnose again",
       "resetNote": "Clears your sorting and your diagnosis — the rest of the page stays as it is.",
@@ -175,7 +198,9 @@
           "answer": "source",
           "weak": false,
           "explain": "Sounds risky, but every region already applies the same repairability- and energy-rating checklist before purchase — buying locally hasn't lowered device quality or shortened lifespans.",
-          "why": "Decentralised isn't automatically unmanaged — check the criteria before you judge the shape of the process."
+          "why": "Decentralised isn't automatically unmanaged — check the criteria before you judge the shape of the process.",
+          "modelCarbon": "high",
+          "modelReadiness": "low"
         },
         {
           "id": "c2",
@@ -183,7 +208,9 @@
           "answer": "control",
           "weak": true,
           "explain": "This is the real gap: with no shared device inventory, there is no baseline to report from anywhere in the lifecycle.",
-          "why": "You can't defend a carbon figure for hardware you can't even count."
+          "why": "You can't defend a carbon figure for hardware you can't even count.",
+          "modelCarbon": "low",
+          "modelReadiness": "high"
         },
         {
           "id": "c3",
@@ -191,7 +218,9 @@
           "answer": "cycle",
           "weak": false,
           "explain": "Reads like neglect, but Nexora already runs an annual health-check that reassigns or upgrades machines that no longer fit the workload — the review just isn't visible from outside IT.",
-          "why": "An in-service device that still fits the job isn't a red flag by itself."
+          "why": "An in-service device that still fits the job isn't a red flag by itself.",
+          "modelCarbon": "low",
+          "modelReadiness": "either"
         },
         {
           "id": "c4",
@@ -199,7 +228,9 @@
           "answer": "control",
           "weak": true,
           "explain": "Missing chain-of-custody across regions is exactly the transparency gap a customer audit will not accept.",
-          "why": "“Somewhere in a cupboard, we think” does not survive a tender review."
+          "why": "“Somewhere in a cupboard, we think” does not survive a tender review.",
+          "modelCarbon": "low",
+          "modelReadiness": "high"
         },
         {
           "id": "c5",
@@ -207,7 +238,9 @@
           "answer": "source",
           "weak": false,
           "explain": "A varying cycle looks inconsistent, but each region sets its own cycle against local usage data — a deliberate, reviewed choice, not drift.",
-          "why": "A different number isn't automatically a worse number — ask what it's based on."
+          "why": "A different number isn't automatically a worse number — ask what it's based on.",
+          "modelCarbon": "high",
+          "modelReadiness": "low"
         },
         {
           "id": "c6",
@@ -215,7 +248,9 @@
           "answer": "cycle",
           "weak": false,
           "explain": "Inconsistent settings sound like waste, but the difference traces to role-based power profiles IT already manages — not to nobody looking at operational energy.",
-          "why": "Variation is only a problem if no one chose it on purpose."
+          "why": "Variation is only a problem if no one chose it on purpose.",
+          "modelCarbon": "low",
+          "modelReadiness": "either"
         },
         {
           "id": "c7",
@@ -223,7 +258,9 @@
           "answer": "control",
           "weak": true,
           "explain": "No owner, no baseline, no agreed system boundary — the transparency the client is pushing for doesn't exist yet.",
-          "why": "A rough baseline you can defend beats a precise one you don't have."
+          "why": "A rough baseline you can defend beats a precise one you don't have.",
+          "modelCarbon": "low",
+          "modelReadiness": "high"
         }
       ],
       "diagnosis": {
@@ -231,7 +268,67 @@
         "correct": "control",
         "correctVerdict": "Control. The device count, its whereabouts and its carbon figure all draw a blank — that's the gap the customer pressure is really about. Source and Cycle had signals that sounded concerning, but neither showed an actual break in practice.",
         "incorrectVerdict": "Look again at Control: nobody can currently produce a device inventory, a disposal trail, or a CO₂ figure. Source and Cycle had signals that sounded concerning, but each one turned out to be a working practice, not a gap."
+      },
+      "quadrant": {
+        "title": "Priority matrix",
+        "intro": "The sort alone doesn't say which signal matters most. Two questions, answered separately: how much carbon it moves, and whether Nexora can act on it today. Nothing here is scored either — plot every signal, then compare against the model.",
+        "carbonQuestion": "If this were fixed, how much carbon impact would it have?",
+        "readinessQuestion": "Can we act on this today — does the data already exist?",
+        "low": "Low",
+        "high": "High",
+        "xLabel": "Carbon impact if fixed",
+        "yLabel": "Readiness to act today",
+        "zoneLabels": {
+          "topLeft": "Foundation — fix first",
+          "topRight": "Quick win — chase this",
+          "bottomLeft": "Noise — deprioritise",
+          "bottomRight": "Big bet — blocked for now"
+        },
+        "compareLabel": "Compare with the model",
+        "compareLocked": "Answer both questions for all seven signals to unlock this.",
+        "yourTitle": "Your matrix",
+        "modelTitle": "The model matrix",
+        "modelInsight": "Source carries more carbon, and the matrix says so plainly. But Control sits in the quadrant that blocks it: no figure built on Source data can be defended to an outside auditor while Control stays broken. Fix the top-left quadrant first — it's what makes the bottom-right one reachable.",
+        "eitherNote": "Cycle signals (3 and 6) accept either reading on readiness — the model plots them on the midline."
+      },
+      "exportNote": {
+        "heading": "Nexora Digital Services",
+        "subheading": "Diagnostic Note — Where We Are Weakest",
+        "watermark": "AION Green IT · Module 2 · Day 3 · Work Block #1",
+        "controlsTitle": "Export your Diagnostic Note",
+        "controlsIntro": "Everything above, laid out as one page you can save or hand in — your signal sort, your priority matrix, and the area you named. Add your name, then export.",
+        "nameLabel": "Submitted by",
+        "namePlaceholder": "Your name",
+        "exportLabel": "Export Diagnostic Note (PDF)",
+        "signalSortTitle": "1 · Signal sort",
+        "matrixTitle": "2 · Priority matrix",
+        "verdictTitle": "3 · The area brought into the room",
+        "notCompleted": "Not yet completed."
       }
+    },
+    {
+      "id": "data",
+      "nav": "Data",
+      "kicker": "Work Block #2 · Small Data",
+      "title": "One office, one number",
+      "intro": "You named Control as the gap — but “the numbers are missing” isn't itself a number. Nexora's Singapore hub is the one office that kept a proper asset register for its laptops. That's one clean, defensible comparison, not a fleet-wide claim — just proof of method. Get it right before you write a single decision in the brief.",
+      "doneRule": "Draft your D3 evidence sentence.",
+      "scenario": {
+        "office": "Singapore hub",
+        "model": "Nexora standard-issue laptop (Model NX-14)",
+        "units": 420,
+        "pcfPerUnit": 210,
+        "pcfSource": "vendor's published Product Carbon Footprint datasheet",
+        "windowYears": 4,
+        "note": "Every other office runs the same replacement policy — just not the same paperwork. Until Control is fixed, this is the one number you can defend."
+      },
+      "whyOnlyOneOffice": "This isn't Nexora's fleet-wide number — it can't be, yet. It's proof of method: one model, one office, five inputs, one defensible answer. That's what makes it usable in the room.",
+      "draft": {
+        "label": "Your D3 sentence",
+        "helper": "Tick it once you have a number to defend, then write the sentence — this is what you'll carry into the final brief.",
+        "placeholder": "D3 — [decision]. Evidence: keeping the 4-year cycle at Singapore saves ≈88.2 t CO₂e over 4 years (420 units × 210 kg CO₂e PCF) versus a 2-year cycle — the only office we can prove this for."
+      },
+      "turn": "Carry this sentence into the final brief. D3 needs a number, not a claim — and now you have one."
     },
     {
       "id": "task2",
@@ -399,7 +496,7 @@
       "nav": "Nexora",
       "kicker": "Work Block #3 · Final brief",
       "title": "Nexora Digital Services — your management proposal",
-      "intro": "You are the IT-governance lead / sustainability consultant for Nexora Digital Services: growing internationally, large device volumes, hybrid IT, mounting pressure to make the old-device inventory and CO₂ impact traceable — with no consistent steering model yet. This is a starter kit, not a form to fill in. Tick a component once you can argue it, and jot your line of reasoning. Everything saves on this device.",
+      "intro": "Your read landed. Nexora's leadership doesn't want a slide of findings — they want someone who can turn “we don't know” into a decision architecture they can act on. Effective now, you're not the outside opinion anymore: you're Nexora's IT-governance lead / sustainability consultant, growing internationally, large device volumes, hybrid IT, still no consistent steering model. This is a starter kit, not a form to fill in. Tick a component once you can argue it, and jot your line of reasoning. Everything saves on this device.",
       "doneRule": "Address at least one component.",
       "seniorNote": "Senior bar: don't produce a list of single actions — produce a robust decision architecture that ties together reporting, responsibility, lifecycle thinking and the ability to steer.",
       "architectureRelation": "The seven parts aren't a checklist to tick off — they lock together into one structure: why it matters and what you report, who owns it and how data flows, the lifecycle it has to cover, and how you keep steering under uncertainty.",
@@ -414,7 +511,7 @@
         {
           "id": "n2",
           "title": "2 · Three core decisions (12 months)",
-          "prompt": "Which three core decisions must management take in the next twelve months?",
+          "prompt": "Which three core decisions must management take in the next twelve months? D1 and D2 are yours to argue. D3 must cite a number — the CO₂ estimate from Block 2 — not a qualitative claim like “signal the 5 biggest levers.”",
           "pillar": "Steer"
         },
         {

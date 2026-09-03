@@ -43,7 +43,7 @@ type Actions = {
   toggleCheck: (key: string, value: boolean) => void;
   setNote: (key: string, text: string) => void;
   reset: () => void;
-  resetSection: (sectionId: string) => void;
+  resetSection: (sectionId: string, extraKeyPrefixes?: string[]) => void;
 };
 
 const emptyProgress: ProgressState = {
@@ -80,16 +80,28 @@ export const useProgress = create<ProgressState & Session & Actions>()(
       reset: () =>
         set((s) => ({ ...emptyProgress, resetCount: s.resetCount + 1 })),
 
-      /** Clears one section's answers only — the rest of the day stands. */
-      resetSection: (sectionId) =>
+      /**
+       * Clears one section's answers only — the rest of the day stands.
+       * `extraKeyPrefixes` sweeps compound keys a mechanic may have added
+       * beyond the plain sectionId (e.g. "c1:carbon" for a per-signal
+       * follow-up), matched by prefix across choices and notes.
+       */
+      resetSection: (sectionId, extraKeyPrefixes = []) =>
         set((s) => {
           const seen = { ...s.seen };
-          const choices = { ...s.choices };
           delete seen[sectionId];
-          delete choices[sectionId];
+          const strip = (rec: Record<string, unknown>) =>
+            Object.fromEntries(
+              Object.entries(rec).filter(
+                ([k]) =>
+                  k !== sectionId &&
+                  !extraKeyPrefixes.some((p) => k.startsWith(p)),
+              ),
+            );
           return {
             seen,
-            choices,
+            choices: strip(s.choices) as ProgressState["choices"],
+            notes: strip(s.notes) as ProgressState["notes"],
             sectionResets: {
               ...s.sectionResets,
               [sectionId]: (s.sectionResets[sectionId] ?? 0) + 1,

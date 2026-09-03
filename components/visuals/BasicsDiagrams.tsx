@@ -281,3 +281,48 @@ export function ConnectionsMap({ className }: DiagramProps) {
     </svg>
   );
 }
+
+/* Roadmap (pre-Basics bridge) — two literacy lanes converge into Basics, then
+   flow through Task's diagnosis into Nexora's decision architecture. */
+export function LiteracyRoadmapDiagram({ className }: DiagramProps) {
+  const mechanics = ["What e-waste is", "Where it comes from", "The disposal ladder", "Scopes 1 · 2 · 3", "CO₂ hotspots"];
+  return (
+    <svg viewBox="0 0 360 320" className={className ?? wrap} role="img" aria-label="Five technical concepts and one steering mindset both feed into Basics, which flows into Task's diagnosis, then into Nexora's decision architecture">
+      <defs><Arrow id="lit-a" color={C.purple} /></defs>
+
+      {/* two lanes */}
+      <text x="8" y="10" fontSize="9" fontWeight="700" fill={C.source} fontFamily="inherit">THE MECHANICS</text>
+      {mechanics.map((t, i) => (
+        <g key={t}>
+          <rect x="8" y={16 + i * 26} width="150" height="20" rx="6" fill={C.paper} stroke={C.line} />
+          <text x="16" y={30 + i * 26} fontSize="9.5" fill={C.ink} fontFamily="inherit">{t}</text>
+        </g>
+      ))}
+
+      <text x="196" y="10" fontSize="9" fontWeight="700" fill={C.cycle} fontFamily="inherit">THE MINDSET</text>
+      <rect x="196" y="67" width="148" height="22" rx="6" fill={C.paper} stroke={C.line} />
+      <text x="204" y="82" fontSize="9" fill={C.ink} fontFamily="inherit">Steer, not just measure</text>
+
+      {/* both lanes converge into Basics */}
+      <line x1="83" y1="140" x2="150" y2="160" stroke={C.purple} strokeWidth="1.5" markerEnd="url(#lit-a)" />
+      <line x1="270" y1="89" x2="210" y2="160" stroke={C.purple} strokeWidth="1.5" markerEnd="url(#lit-a)" />
+
+      {/* the flow: Basics -> Task -> Nexora */}
+      <rect x="75" y="160" width="210" height="28" rx="8" fill={C.navy} />
+      <text x="180" y="178" textAnchor="middle" fontSize="10.5" fontWeight="700" fill={C.paper} fontFamily="inherit">Basics — the vocabulary</text>
+
+      <line x1="180" y1="188" x2="180" y2="202" stroke={C.purple} strokeWidth="1.8" markerEnd="url(#lit-a)" />
+
+      <rect x="80" y="202" width="200" height="28" rx="8" fill={C.source} />
+      <text x="180" y="220" textAnchor="middle" fontSize="10.5" fontWeight="700" fill={C.paper} fontFamily="inherit">Task — the evidence</text>
+
+      <line x1="180" y1="230" x2="180" y2="244" stroke={C.purple} strokeWidth="1.8" markerEnd="url(#lit-a)" />
+
+      <rect x="70" y="244" width="220" height="30" rx="8" fill={C.control} />
+      <text x="180" y="263" textAnchor="middle" fontSize="10.5" fontWeight="700" fill={C.navy} fontFamily="inherit">Nexora — the decision</text>
+
+      <line x1="180" y1="274" x2="180" y2="292" stroke={C.ash} strokeWidth="1.5" strokeDasharray="4 4" markerEnd="url(#lit-a)" />
+      <text x="180" y="308" textAnchor="middle" fontSize="9.5" fontWeight="600" fill={C.ash} fontFamily="inherit">→ whether you get the room</text>
+    </svg>
+  );
+}

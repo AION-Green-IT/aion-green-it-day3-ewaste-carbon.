@@ -3,17 +3,21 @@ import {
   getSection,
   type BasicsSection,
   // type BlueGridSection, — hidden for now, keep for later use
+  type DataSection,
   type NexoraSection,
   type Task1Section,
   // type Task2Section, — hidden for now, keep for later use
 } from "@/lib/content";
 import { Section } from "@/components/ui/Section";
 import { Opening } from "@/components/chrome/Opening";
+import { Roadmap } from "@/components/chrome/Roadmap";
 import { Basics } from "@/components/mechanics/Basics";
 import { RiskCategorizer } from "@/components/mechanics/RiskCategorizer";
+import { DataProof } from "@/components/mechanics/DataProof";
 // import { PriorityPicker } from "@/components/mechanics/PriorityPicker"; — hidden for now, keep for later use
 // import { CasePriority } from "@/components/mechanics/CasePriority"; — hidden for now, keep for later use
 import { StarterKit } from "@/components/mechanics/StarterKit";
+import { DiagnosticNoteExport } from "@/components/mechanics/DiagnosticNoteExport";
 import { SectionReset } from "@/components/chrome/SectionReset";
 import { LeafMark } from "@/components/chrome/Icons";
 
@@ -21,12 +25,17 @@ export default function Page() {
   const { meta } = content;
   const basics = getSection<BasicsSection>("basics");
   const task1 = getSection<Task1Section>("task1");
+  const dataSection = getSection<DataSection>("data");
   // const task2 = getSection<Task2Section>("task2"); — hidden for now, keep for later use
   // const bluegrid = getSection<BlueGridSection>("bluegrid"); — hidden for now, keep for later use
   const nexora = getSection<NexoraSection>("nexora");
 
   return (
     <>
+      {/* Everything below is the normal interactive page; it collapses out
+          of the way when printing so only DiagnosticNoteExport (a sibling,
+          outside this wrapper) reaches the page. */}
+      <div className="print:hidden">
       {/* Hero */}
       <div className="max-w-3xl py-12">
         <p className="mb-2 flex items-center gap-2 text-caption font-semibold uppercase tracking-wide text-purple">
@@ -47,6 +56,9 @@ export default function Page() {
 
       {/* Urgency cold-open */}
       <Opening />
+
+      {/* Bridge: why the basics are worth two minutes, before the first card */}
+      <Roadmap />
 
       {/* Block 1a — basics */}
       <Section
@@ -74,6 +86,10 @@ export default function Page() {
               sectionId="task1"
               label={task1.resetLabel}
               note={task1.resetNote}
+              extraKeyPrefixes={[
+                ...task1.clues.map((c) => `${c.id}:`),
+                "task1:",
+              ]}
             />
           ) : null
         }
@@ -81,7 +97,20 @@ export default function Page() {
         <RiskCategorizer section={task1} />
       </Section>
 
-      {/* Block 1c — Task 2 — hidden for now, keep for later use
+      <Divider />
+
+      {/* Block 2 — the one defensible comparison; feeds D3 in Nexora's brief */}
+      <Section
+        id="data"
+        kicker={dataSection.kicker}
+        title={dataSection.title}
+        intro={dataSection.intro}
+        doneRule={dataSection.doneRule}
+      >
+        <DataProof section={dataSection} />
+      </Section>
+
+      {/* Task 2 — hidden for now, keep for later use
       <Divider />
 
       <Section
@@ -95,7 +124,7 @@ export default function Page() {
       </Section>
       */}
 
-      {/* Block 2 — BlueGrid case — hidden for now, keep for later use
+      {/* BlueGrid case — hidden for now, keep for later use
       <Divider />
 
       <Section
@@ -119,8 +148,11 @@ export default function Page() {
         intro={nexora.intro}
         doneRule={nexora.doneRule}
       >
-        <StarterKit section={nexora} diagnosisSection={task1} />
+        <StarterKit section={nexora} diagnosisSection={task1} dataSection={dataSection} />
       </Section>
+      </div>
+
+      <DiagnosticNoteExport section={task1} />
     </>
   );
 }
