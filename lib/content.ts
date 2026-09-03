@@ -225,6 +225,8 @@ export type CarbonTableRow = {
   /** Which WorkBlock2Config field holds this row's number — the table reads the value live, never a second copy of it. */
   configKey: "pcfPerUnitKg" | "modelBPcfPerUnitKg" | "disposalLandfillKg" | "disposalRecyclerKg";
   unit: string;
+  /** Short code the auto-calculator's factor pickers show and reference — the "keterangan" that ties a picked factor back to its table row. */
+  ref: string;
 };
 
 export type PartAQuestion = {
@@ -277,7 +279,24 @@ export type DataSection = SectionBase & {
     tableTitle: string;
     formulaLabel: string;
     table: CarbonTableRow[];
-    calculatorTitle: string;
+    /** The auto-calculator: picks factors by their table `ref` instead of retyping numbers, and computes live. */
+    calculator: {
+      title: string;
+      help: string;
+      carbonModeLabel: string;
+      disposalModeLabel: string;
+      unitsLabel: string;
+      cycleLabel: string;
+      factorLabel: string;
+      factor1Label: string;
+      factor2Label: string;
+      addModelLabel: string;
+      removeModelLabel: string;
+      totalLabel: string;
+      tonnesToggleLabel: string;
+      carbonFormula: string;
+      disposalFormula: string;
+    };
     questions: PartAQuestion[];
     correctFeedback: string;
     retryFeedback: string;

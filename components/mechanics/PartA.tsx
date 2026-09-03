@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import clsx from "clsx";
-import type { DataSection, Task1Section } from "@/lib/content";
+import type { CarbonTableRow, DataSection, Task1Section } from "@/lib/content";
 import { useHydrated, useProgress } from "@/lib/store";
 import {
   computePartAAnswers,
@@ -70,6 +70,9 @@ export function PartA({
             <thead>
               <tr>
                 <th className="border border-line p-2 text-left text-caption font-semibold uppercase tracking-wide text-ash">
+                  Ref
+                </th>
+                <th className="border border-line p-2 text-left text-caption font-semibold uppercase tracking-wide text-ash">
                   Item
                 </th>
                 <th className="border border-line p-2 text-left text-caption font-semibold uppercase tracking-wide text-ash">
@@ -83,6 +86,11 @@ export function PartA({
             <tbody>
               {partA.table.map((row) => (
                 <tr key={row.item}>
+                  <td className="border border-line p-2">
+                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-lilac/60 text-caption font-bold text-navy">
+                      {row.ref}
+                    </span>
+                  </td>
                   <td className="border border-line p-2 text-ink">{row.item}</td>
                   <td className="border border-line p-2 text-ash">{row.category}</td>
                   <td className="border border-line p-2 text-right tabular-nums text-ink">
@@ -98,8 +106,8 @@ export function PartA({
         </p>
       </div>
 
-      {/* Calculator */}
-      <Calculator title={partA.calculatorTitle} />
+      {/* Auto-calculator: picks factors from the table above, computes live */}
+      <Calculator table={partA.table} config={config} copy={partA.calculator} />
 
       {/* Questions */}
       <div className="space-y-4">
@@ -272,122 +280,267 @@ function Q5({
   );
 }
 
-function Calculator({ title }: { title: string }) {
-  const [display, setDisplay] = useState("0");
-  const [stored, setStored] = useState<number | null>(null);
-  const [pendingOp, setPendingOp] = useState<"+" | "−" | "×" | "÷" | null>(null);
-  const [freshEntry, setFreshEntry] = useState(true);
+type CalcCopy = DataSection["partA"]["calculator"];
 
-  const inputDigit = (d: string) => {
-    setDisplay((prev) => (freshEntry || prev === "0" ? d : prev + d));
-    setFreshEntry(false);
+type CarbonRow = { units: string; cycleYears: string; factorRef: string };
+
+/** Reads a table row's live value by its `ref` code — the one place a picked factor turns into a number. */
+function factorValue(table: CarbonTableRow[], config: DataSection["config"], ref: string): number {
+  const row = table.find((r) => r.ref === ref);
+  return row ? config[row.configKey] : 0;
+}
+
+function newCarbonRow(table: CarbonTableRow[]): CarbonRow {
+  return { units: "", cycleYears: "", factorRef: table[0]?.ref ?? "" };
+}
+
+/**
+ * Not a general-purpose calculator: it computes the two formulas this block
+ * actually uses (embodied carbon, disposal impact), fed by factors picked
+ * from the table above by their `ref` code — there is nothing to retype or
+ * mistype, only to select and read.
+ */
+function Calculator({
+  table,
+  config,
+  copy,
+}: {
+  table: CarbonTableRow[];
+  config: DataSection["config"];
+  copy: CalcCopy;
+}) {
+  const [mode, setMode] = useState<"carbon" | "disposal">("carbon");
+  const [rows, setRows] = useState<CarbonRow[]>([newCarbonRow(table)]);
+  const [tonnes, setTonnes] = useState(false);
+
+  const disposalFactorRefs = table.filter((r) => r.category === "Disposal").map((r) => r.ref);
+  const [disposalUnits, setDisposalUnits] = useState("");
+  const [factor1Ref, setFactor1Ref] = useState(disposalFactorRefs[0] ?? table[0]?.ref ?? "");
+  const [factor2Ref, setFactor2Ref] = useState(disposalFactorRefs[1] ?? table[0]?.ref ?? "");
+
+  const updateRow = (i: number, patch: Partial<CarbonRow>) =>
+    setRows((prev) => prev.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
+
+  const carbonRowResult = (row: CarbonRow): number | null => {
+    const units = Number.parseFloat(row.units.replace(",", "."));
+    const cycle = Number.parseFloat(row.cycleYears.replace(",", "."));
+    if (Number.isNaN(units) || Number.isNaN(cycle) || cycle === 0) return null;
+    return (units / cycle) * factorValue(table, config, row.factorRef);
   };
 
-  const inputDecimal = () => {
-    setDisplay((prev) => {
-      if (freshEntry) return "0.";
-      return prev.includes(".") ? prev : prev + ".";
-    });
-    setFreshEntry(false);
-  };
+  const carbonResults = rows.map(carbonRowResult);
+  const carbonTotal = carbonResults.every((r) => r !== null)
+    ? (carbonResults as number[]).reduce((a, b) => a + b, 0)
+    : null;
 
-  const applyOp = (a: number, b: number, op: typeof pendingOp): number => {
-    switch (op) {
-      case "+":
-        return a + b;
-      case "−":
-        return a - b;
-      case "×":
-        return a * b;
-      case "÷":
-        return b === 0 ? NaN : a / b;
-      default:
-        return b;
-    }
-  };
+  const disposalUnitsNum = Number.parseFloat(disposalUnits.replace(",", "."));
+  const disposalResult =
+    Number.isNaN(disposalUnitsNum) || !factor1Ref || !factor2Ref
+      ? null
+      : disposalUnitsNum *
+        (factorValue(table, config, factor1Ref) - factorValue(table, config, factor2Ref));
 
-  const chooseOp = (op: "+" | "−" | "×" | "÷") => {
-    const current = Number.parseFloat(display);
-    if (stored !== null && pendingOp && !freshEntry) {
-      setStored(applyOp(stored, current, pendingOp));
-    } else {
-      setStored(current);
-    }
-    setPendingOp(op);
-    setFreshEntry(true);
-  };
-
-  const equals = () => {
-    const current = Number.parseFloat(display);
-    if (stored === null || !pendingOp) return;
-    const result = applyOp(stored, current, pendingOp);
-    setDisplay(Number.isNaN(result) ? "Error" : String(result));
-    setStored(null);
-    setPendingOp(null);
-    setFreshEntry(true);
-  };
-
-  const clear = () => {
-    setDisplay("0");
-    setStored(null);
-    setPendingOp(null);
-    setFreshEntry(true);
-  };
+  const formatResult = (v: number) => (tonnes ? `${(v / 1000).toFixed(3)} t CO₂e` : `${v.toLocaleString()} kg CO₂e`);
 
   return (
-    <div className="max-w-xs rounded-xl border border-line bg-paper p-3">
-      <p className="mb-2 text-caption font-semibold uppercase tracking-wide text-ash">{title}</p>
-      <div className="mb-2 rounded-lg bg-lilac/40 p-2.5 text-right text-h3 tabular-nums text-ink">
-        {display}
+    <div className="rounded-xl border border-line bg-paper p-3">
+      <p className="mb-1 text-caption font-semibold uppercase tracking-wide text-ash">{copy.title}</p>
+      <p className="mb-3 text-caption text-ash">{copy.help}</p>
+
+      <div className="mb-3 flex gap-2">
+        <ModeButton active={mode === "carbon"} onClick={() => setMode("carbon")}>
+          {copy.carbonModeLabel}
+        </ModeButton>
+        <ModeButton active={mode === "disposal"} onClick={() => setMode("disposal")}>
+          {copy.disposalModeLabel}
+        </ModeButton>
       </div>
-      <div className="grid grid-cols-4 gap-1.5">
-        {["7", "8", "9"].map((d) => (
-          <CalcButton key={d} label={d} onClick={() => inputDigit(d)} />
-        ))}
-        <CalcButton label="÷" variant="op" onClick={() => chooseOp("÷")} />
-        {["4", "5", "6"].map((d) => (
-          <CalcButton key={d} label={d} onClick={() => inputDigit(d)} />
-        ))}
-        <CalcButton label="×" variant="op" onClick={() => chooseOp("×")} />
-        {["1", "2", "3"].map((d) => (
-          <CalcButton key={d} label={d} onClick={() => inputDigit(d)} />
-        ))}
-        <CalcButton label="−" variant="op" onClick={() => chooseOp("−")} />
-        <CalcButton label="0" onClick={() => inputDigit("0")} />
-        <CalcButton label="." onClick={inputDecimal} />
-        <CalcButton label="C" variant="clear" onClick={clear} />
-        <CalcButton label="+" variant="op" onClick={() => chooseOp("+")} />
-        <CalcButton label="=" variant="equals" onClick={equals} className="col-span-4" />
-      </div>
+
+      {mode === "carbon" ? (
+        <div className="space-y-3">
+          <p className="text-caption font-semibold text-navy">{copy.carbonFormula}</p>
+          {rows.map((row, i) => {
+            const result = carbonResults[i];
+            const factor = factorValue(table, config, row.factorRef);
+            return (
+              <div key={i} className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:items-end">
+                <NumberField
+                  label={copy.unitsLabel}
+                  value={row.units}
+                  onChange={(v) => updateRow(i, { units: v })}
+                />
+                <NumberField
+                  label={copy.cycleLabel}
+                  value={row.cycleYears}
+                  onChange={(v) => updateRow(i, { cycleYears: v })}
+                />
+                <FactorSelect
+                  label={copy.factorLabel}
+                  table={table}
+                  value={row.factorRef}
+                  onChange={(v) => updateRow(i, { factorRef: v })}
+                />
+                <p className="text-caption tabular-nums text-ash sm:pb-2.5">
+                  {row.units && row.cycleYears
+                    ? `(${row.units} ÷ ${row.cycleYears}) × ${factor} = ${result !== null ? formatResult(result) : "—"}`
+                    : "—"}
+                </p>
+              </div>
+            );
+          })}
+
+          <div className="flex flex-wrap items-center gap-3">
+            {rows.length < 2 ? (
+              <button
+                type="button"
+                onClick={() => setRows((prev) => [...prev, newCarbonRow(table)])}
+                className="text-caption font-semibold text-purple hover:underline"
+              >
+                {copy.addModelLabel}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setRows((prev) => prev.slice(0, 1))}
+                className="text-caption font-semibold text-ash hover:underline"
+              >
+                {copy.removeModelLabel}
+              </button>
+            )}
+          </div>
+
+          <TonnesToggle checked={tonnes} onChange={setTonnes} label={copy.tonnesToggleLabel} />
+
+          <p className="rounded-lg bg-lilac/40 p-2.5 text-right text-h3 tabular-nums text-ink">
+            {copy.totalLabel}: {carbonTotal !== null ? formatResult(carbonTotal) : "—"}
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <p className="text-caption font-semibold text-navy">{copy.disposalFormula}</p>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <NumberField label={copy.unitsLabel} value={disposalUnits} onChange={setDisposalUnits} />
+            <FactorSelect
+              label={copy.factor1Label}
+              table={table}
+              value={factor1Ref}
+              onChange={setFactor1Ref}
+            />
+            <FactorSelect
+              label={copy.factor2Label}
+              table={table}
+              value={factor2Ref}
+              onChange={setFactor2Ref}
+            />
+          </div>
+          <p className="text-caption tabular-nums text-ash">
+            {disposalUnits
+              ? `${disposalUnits} × (${factorValue(table, config, factor1Ref)} − ${factorValue(table, config, factor2Ref)})`
+              : "—"}
+          </p>
+          <TonnesToggle checked={tonnes} onChange={setTonnes} label={copy.tonnesToggleLabel} />
+          <p className="rounded-lg bg-lilac/40 p-2.5 text-right text-h3 tabular-nums text-ink">
+            {copy.totalLabel}: {disposalResult !== null ? formatResult(disposalResult) : "—"}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
 
-function CalcButton({
-  label,
+function ModeButton({
+  active,
   onClick,
-  variant,
-  className,
+  children,
 }: {
-  label: string;
+  active: boolean;
   onClick: () => void;
-  variant?: "op" | "clear" | "equals";
-  className?: string;
+  children: React.ReactNode;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       className={clsx(
-        "rounded-lg py-2 text-body font-semibold transition-colors duration-200",
-        variant === "op" && "bg-lilac text-navy hover:bg-lilac/70",
-        variant === "clear" && "bg-warn/15 text-warn hover:bg-warn/25",
-        variant === "equals" && "bg-navy text-paper hover:bg-purple",
-        !variant && "bg-lilac/40 text-ink hover:bg-lilac/70",
-        className,
+        "rounded-lg px-3 py-1.5 text-caption font-semibold transition-colors duration-200",
+        active ? "bg-navy text-paper" : "bg-lilac/40 text-ash hover:bg-lilac/70",
       )}
     >
-      {label}
+      {children}
     </button>
+  );
+}
+
+function NumberField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-caption text-ash">{label}</span>
+      <input
+        type="text"
+        inputMode="decimal"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-lg border border-line bg-paper p-2 text-body text-ink focus:border-purple"
+      />
+    </label>
+  );
+}
+
+function FactorSelect({
+  label,
+  table,
+  value,
+  onChange,
+}: {
+  label: string;
+  table: CarbonTableRow[];
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-caption text-ash">{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-lg border border-line bg-paper p-2 text-body text-ink focus:border-purple"
+      >
+        {table.map((row) => (
+          <option key={row.ref} value={row.ref}>
+            {row.ref} — {row.item}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function TonnesToggle({
+  checked,
+  onChange,
+  label,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  label: string;
+}) {
+  return (
+    <label className="flex items-center gap-2 text-caption text-ash">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="h-4 w-4 accent-purple"
+      />
+      {label}
+    </label>
   );
 }

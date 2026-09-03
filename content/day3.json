@@ -351,12 +351,28 @@
         "tableTitle": "IT Carbon Factors",
         "formulaLabel": "Annual embodied carbon = (units ÷ cycle years) × factor",
         "table": [
-          { "item": "Laptop Model A (standard)", "category": "Manufacturing", "configKey": "pcfPerUnitKg", "unit": "kg CO₂e / unit" },
-          { "item": "Laptop Model B (premium)", "category": "Manufacturing", "configKey": "modelBPcfPerUnitKg", "unit": "kg CO₂e / unit" },
-          { "item": "Disposal — landfill (undocumented)", "category": "Disposal", "configKey": "disposalLandfillKg", "unit": "kg CO₂e / unit" },
-          { "item": "Disposal — certified recycler", "category": "Disposal", "configKey": "disposalRecyclerKg", "unit": "kg CO₂e / unit" }
+          { "ref": "A", "item": "Laptop Model A (standard)", "category": "Manufacturing", "configKey": "pcfPerUnitKg", "unit": "kg CO₂e / unit" },
+          { "ref": "B", "item": "Laptop Model B (premium)", "category": "Manufacturing", "configKey": "modelBPcfPerUnitKg", "unit": "kg CO₂e / unit" },
+          { "ref": "L", "item": "Disposal — landfill (undocumented)", "category": "Disposal", "configKey": "disposalLandfillKg", "unit": "kg CO₂e / unit" },
+          { "ref": "R", "item": "Disposal — certified recycler", "category": "Disposal", "configKey": "disposalRecyclerKg", "unit": "kg CO₂e / unit" }
         ],
-        "calculatorTitle": "Calculator",
+        "calculator": {
+          "title": "Auto-calculator",
+          "help": "Pick factors by their code (A, B, L, R) instead of retyping numbers — the value comes straight from the table above.",
+          "carbonModeLabel": "Embodied carbon",
+          "disposalModeLabel": "Disposal impact",
+          "unitsLabel": "Units",
+          "cycleLabel": "Cycle years",
+          "factorLabel": "Factor",
+          "factor1Label": "Factor 1",
+          "factor2Label": "Factor 2",
+          "addModelLabel": "+ Add a second model (mixed fleet)",
+          "removeModelLabel": "Remove second model",
+          "totalLabel": "Total",
+          "tonnesToggleLabel": "Show in tonnes CO₂e (÷ 1000)",
+          "carbonFormula": "(Units ÷ Cycle years) × Factor",
+          "disposalFormula": "Units × (Factor 1 − Factor 2)"
+        },
         "questions": [
           {
             "id": "q1",
