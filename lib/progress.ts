@@ -49,9 +49,11 @@ export function useSectionStatuses(): {
       done: (seen.basics ?? []).length,
       total: basics.concepts.length,
     },
+    // Sorting every signal plus the final diagnosis pick — the finding that
+    // carries forward into the next task.
     task1: {
-      done: (seen.task1 ?? []).length,
-      total: task1.clues.length,
+      done: (seen.task1 ?? []).length + (choices.task1 ? 1 : 0),
+      total: task1.clues.length + 1,
     },
     // A single pick completes the mechanic.
     task2: { done: choices.task2 ? 1 : 0, total: 1 },

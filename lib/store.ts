@@ -29,6 +29,12 @@ type Session = {
    * persisted store never sees. Not persisted — a within-session signal only.
    */
   resetCount: number;
+  /**
+   * Per-section counterpart of resetCount: sectionId -> how many times that
+   * one section has been cleared. A mechanic keys its own component-local
+   * state on it so "sort these again" wipes revealed answers too.
+   */
+  sectionResets: Record<string, number>;
 };
 
 type Actions = {
@@ -37,6 +43,7 @@ type Actions = {
   toggleCheck: (key: string, value: boolean) => void;
   setNote: (key: string, text: string) => void;
   reset: () => void;
+  resetSection: (sectionId: string) => void;
 };
 
 const emptyProgress: ProgressState = {
@@ -54,6 +61,7 @@ export const useProgress = create<ProgressState & Session & Actions>()(
     (set) => ({
       ...emptyProgress,
       resetCount: 0,
+      sectionResets: {},
 
       markSeen: (sectionId, itemId) =>
         set((s) => ({
@@ -71,6 +79,23 @@ export const useProgress = create<ProgressState & Session & Actions>()(
 
       reset: () =>
         set((s) => ({ ...emptyProgress, resetCount: s.resetCount + 1 })),
+
+      /** Clears one section's answers only — the rest of the day stands. */
+      resetSection: (sectionId) =>
+        set((s) => {
+          const seen = { ...s.seen };
+          const choices = { ...s.choices };
+          delete seen[sectionId];
+          delete choices[sectionId];
+          return {
+            seen,
+            choices,
+            sectionResets: {
+              ...s.sectionResets,
+              [sectionId]: (s.sectionResets[sectionId] ?? 0) + 1,
+            },
+          };
+        }),
     }),
     {
       name: STORAGE_KEY,

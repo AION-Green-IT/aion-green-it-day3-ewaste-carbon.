@@ -35,8 +35,18 @@ export type Clue = {
   id: string;
   text: string;
   answer: string;
+  /** True when this signal is real evidence of the diagnosed weak area; false when it's a plausible-looking decoy. */
+  weak: boolean;
   explain: string;
   why: string;
+};
+
+export type Diagnosis = {
+  prompt: string;
+  /** Category code (matches a RiskCategory.code) that the evidence actually points to. */
+  correct: string;
+  correctVerdict: string;
+  incorrectVerdict: string;
 };
 
 export type Consequence = {
@@ -85,6 +95,13 @@ type SectionBase = {
   title: string;
   intro: string;
   doneRule: string;
+  /**
+   * Optional per-section "start over" affordance. When both are present the
+   * page renders a reset button in the section header; sections without them
+   * simply have none.
+   */
+  resetLabel?: string;
+  resetNote?: string;
 };
 
 export type BasicsSection = SectionBase & {
@@ -99,6 +116,8 @@ export type Task1Section = SectionBase & {
   areasVisual: string;
   categories: RiskCategory[];
   clues: Clue[];
+  /** The synthesis step: which one area the sorted evidence actually points to. Its pick is carried forward as input to the next task. */
+  diagnosis: Diagnosis;
 };
 
 export type Task2Section = SectionBase & {
@@ -182,7 +201,7 @@ export function getSection<T extends Section>(id: T["id"]): T {
 export const SECTION_ORDER: SectionId[] = [
   "basics",
   "task1",
-  "task2",
-  "bluegrid",
+  // "task2", — hidden for now, keep in content.day3.json for later use
+  // "bluegrid", — hidden for now, keep in content.day3.json for later use
   "nexora",
 ];

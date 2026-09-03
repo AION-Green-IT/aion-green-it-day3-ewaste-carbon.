@@ -16,6 +16,7 @@ export function Section({
   title,
   intro,
   doneRule,
+  action,
   children,
 }: {
   id: SectionId;
@@ -23,6 +24,8 @@ export function Section({
   title: string;
   intro: string;
   doneRule: string;
+  /** Optional control beside the progress bar, e.g. a per-section reset. */
+  action?: React.ReactNode;
   children: React.ReactNode;
 }) {
   const hydrated = useHydrated();
@@ -52,22 +55,29 @@ export function Section({
         <h2 className="mb-3 text-h2 text-ink">{title}</h2>
         <p className="text-body text-ash">{intro}</p>
 
-        {showProgress ? (
-          <div className="mt-4 flex items-center gap-3">
-            <div className="h-1.5 w-40 overflow-hidden rounded-full bg-lilac">
-              <div
-                className={clsx(
-                  "h-full rounded-full transition-[width] duration-300",
-                  status!.complete ? "bg-good" : "bg-purple",
-                )}
-                style={{
-                  width: `${Math.min(100, (status!.done / status!.total) * 100)}%`,
-                }}
-              />
-            </div>
-            <span className="text-caption tabular-nums text-ash">
-              {Math.min(status!.done, status!.total)} / {status!.total}
-            </span>
+        {showProgress || action ? (
+          // empty:hidden keeps the row from adding space when `action` itself
+          // renders nothing (an untouched section) and there is no bar yet.
+          <div className="mt-4 flex flex-wrap items-center gap-3 empty:hidden">
+            {showProgress ? (
+              <>
+                <div className="h-1.5 w-40 overflow-hidden rounded-full bg-lilac">
+                  <div
+                    className={clsx(
+                      "h-full rounded-full transition-[width] duration-300",
+                      status!.complete ? "bg-good" : "bg-purple",
+                    )}
+                    style={{
+                      width: `${Math.min(100, (status!.done / status!.total) * 100)}%`,
+                    }}
+                  />
+                </div>
+                <span className="text-caption tabular-nums text-ash">
+                  {Math.min(status!.done, status!.total)} / {status!.total}
+                </span>
+              </>
+            ) : null}
+            {action}
           </div>
         ) : null}
       </div>

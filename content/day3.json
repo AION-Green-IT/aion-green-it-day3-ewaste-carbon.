@@ -139,11 +139,13 @@
     },
     {
       "id": "task1",
-      "nav": "Task 1",
-      "kicker": "Work Block #1 · Task 1",
-      "title": "Where does the risk sit? — ByteWave Logistics",
-      "intro": "ByteWave Logistics: 650 staff, decentralised IT procurement, routine device replacement, outsourced disposal — and a major customer now asking for proof of environmental impact and responsible handling of old devices. Sort each clue into one of three areas. There is no score, and being wrong costs nothing — the point is the reasoning that opens up.",
-      "doneRule": "Sort all clues into an area.",
+      "nav": "Task",
+      "kicker": "Work Block #1 · Task",
+      "title": "Where is Nexora weakest? — Nexora Digital Services",
+      "intro": "You are the IT-governance lead / sustainability consultant for Nexora Digital Services: growing internationally, large device volumes, hybrid IT, mounting pressure to make the old-device inventory and CO₂ impact traceable — with no consistent steering model yet. Before you can propose anything, you need to know where it actually hurts. Sort every signal into Source, Cycle or Control — some are the real weak spot, others just look alarming. Name the one area you'd bring into the room, because that call carries into the work ahead.",
+      "doneRule": "Sort every signal, then name the weak spot.",
+      "resetLabel": "Diagnose again",
+      "resetNote": "Clears your sorting and your diagnosis — the rest of the page stays as it is.",
       "areasRelation": "The three areas are one device's life in order: what you buy (Source) → how it runs (Cycle) → whether you can see it and close it out (Control). A risk in any one is a management gap in that phase.",
       "areasVisual": "areasLifecycle",
       "categories": [
@@ -169,54 +171,67 @@
       "clues": [
         {
           "id": "c1",
-          "text": "Notebooks and phones are replaced on a fixed three-year cycle, whether or not the hardware still does the job.",
+          "text": "Each country office buys its own devices locally instead of going through one central contract.",
           "answer": "source",
-          "explain": "The replacement rule itself manufactures waste on a schedule. This is set in procurement/replacement policy, not at disposal.",
-          "why": "The cheapest device to dispose of responsibly is the one you didn't replace early."
+          "weak": false,
+          "explain": "Sounds risky, but every region already applies the same repairability- and energy-rating checklist before purchase — buying locally hasn't lowered device quality or shortened lifespans.",
+          "why": "Decentralised isn't automatically unmanaged — check the criteria before you judge the shape of the process."
         },
         {
           "id": "c2",
-          "text": "In procurement, price, availability and performance are the only deciding factors.",
-          "answer": "source",
-          "explain": "Buying criteria with no lifecycle or repairability weighting lock in short lives and higher embodied carbon at the point of purchase.",
-          "why": "Procurement criteria are a lever leadership controls directly — and quietly shape years of impact."
+          "text": "No one at Nexora can currently produce a single number for how many devices are active across its country offices.",
+          "answer": "control",
+          "weak": true,
+          "explain": "This is the real gap: with no shared device inventory, there is no baseline to report from anywhere in the lifecycle.",
+          "why": "You can't defend a carbon figure for hardware you can't even count."
         },
         {
           "id": "c3",
-          "text": "Devices run untouched for their full three years — no mid-life review of whether they still fit the workload.",
+          "text": "Staff keep the same laptop through the full replacement cycle even as they move between office and home.",
           "answer": "cycle",
-          "explain": "This is an in-service question: over- and under-used machines look identical, so nothing gets reassigned or right-sized.",
-          "why": "A mid-life review can extend useful life and cut both cost and operational emissions."
+          "weak": false,
+          "explain": "Reads like neglect, but Nexora already runs an annual health-check that reassigns or upgrades machines that no longer fit the workload — the review just isn't visible from outside IT.",
+          "why": "An in-service device that still fits the job isn't a red flag by itself."
         },
         {
           "id": "c4",
-          "text": "Energy use in daily operation is never looked at — efficiency is not part of any decision.",
-          "answer": "cycle",
-          "explain": "Operational emissions during use are a live control point, distinct from how the device was bought or disposed of.",
-          "why": "Operational CO₂ is often the part you can act on first, without new hardware."
+          "text": "Retired laptops from three regional offices sit in local storage rooms with no shared record of quantity, condition or next destination.",
+          "answer": "control",
+          "weak": true,
+          "explain": "Missing chain-of-custody across regions is exactly the transparency gap a customer audit will not accept.",
+          "why": "“Somewhere in a cupboard, we think” does not survive a tender review."
         },
         {
           "id": "c5",
-          "text": "Retired devices are partly stored, partly handed on — with no record of where they end up.",
-          "answer": "control",
-          "explain": "Missing chain-of-custody is a transparency and disposal-control gap: you can't report, audit or improve what you can't trace.",
-          "why": "“We don't know where they went” is exactly the answer a customer audit will not accept."
+          "text": "Nexora's device replacement cycle varies by country, from two to four years.",
+          "answer": "source",
+          "weak": false,
+          "explain": "A varying cycle looks inconsistent, but each region sets its own cycle against local usage data — a deliberate, reviewed choice, not drift.",
+          "why": "A different number isn't automatically a worse number — ask what it's based on."
         },
         {
           "id": "c6",
-          "text": "There is no visibility into reuse, refurbishment or recycling rates.",
-          "answer": "control",
-          "explain": "Without these figures there is no baseline to steer by — the whole end-of-life picture is dark.",
-          "why": "You cannot set a target, or claim progress, against a number you have never measured."
+          "text": "Energy-saving settings differ from laptop to laptop across the fleet.",
+          "answer": "cycle",
+          "weak": false,
+          "explain": "Inconsistent settings sound like waste, but the difference traces to role-based power profiles IT already manages — not to nobody looking at operational energy.",
+          "why": "Variation is only a problem if no one chose it on purpose."
         },
         {
           "id": "c7",
-          "text": "IT can't give a reliable carbon figure for its devices or its operations.",
+          "text": "IT has never been asked to report a CO₂ figure for hardware, so no one currently owns producing one.",
           "answer": "control",
-          "explain": "No baseline, no emission factors, no agreed system boundary — this is the transparency gap the customer is really probing.",
-          "why": "A pragmatic baseline, even a rough one, is what turns “we don't know” into a defensible statement."
+          "weak": true,
+          "explain": "No owner, no baseline, no agreed system boundary — the transparency the client is pushing for doesn't exist yet.",
+          "why": "A rough baseline you can defend beats a precise one you don't have."
         }
-      ]
+      ],
+      "diagnosis": {
+        "prompt": "You've read every signal. If you had to name ONE weak spot to bring into the room, which is it?",
+        "correct": "control",
+        "correctVerdict": "Control. The device count, its whereabouts and its carbon figure all draw a blank — that's the gap the customer pressure is really about. Source and Cycle had signals that sounded concerning, but neither showed an actual break in practice.",
+        "incorrectVerdict": "Look again at Control: nobody can currently produce a device inventory, a disposal trail, or a CO₂ figure. Source and Cycle had signals that sounded concerning, but each one turned out to be a working practice, not a gap."
+      }
     },
     {
       "id": "task2",

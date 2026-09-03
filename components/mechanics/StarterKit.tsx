@@ -1,12 +1,19 @@
 "use client";
 
 import clsx from "clsx";
-import type { NexoraComponent, NexoraSection } from "@/lib/content";
+import type { NexoraComponent, NexoraSection, Task1Section } from "@/lib/content";
 import { useHydrated, useProgress } from "@/lib/store";
 import { ArchitectureDiagram } from "@/components/visuals/SectionDiagrams";
 import { Explainer } from "@/components/ui/Explainer";
 
-export function StarterKit({ section }: { section: NexoraSection }) {
+export function StarterKit({
+  section,
+  diagnosisSection,
+}: {
+  section: NexoraSection;
+  /** The Task section whose diagnosis pick feeds in as this section's starting condition. */
+  diagnosisSection: Task1Section;
+}) {
   const hydrated = useHydrated();
   const checks = useProgress((s) => s.checks);
   const addressed = hydrated
@@ -15,6 +22,8 @@ export function StarterKit({ section }: { section: NexoraSection }) {
 
   return (
     <div className="space-y-5">
+      <DiagnosisCarryover section={diagnosisSection} />
+
       <div className="flex flex-wrap items-center gap-3 rounded-2xl border-l-4 border-navy bg-lilac/50 p-4">
         <p className="flex-1 text-body text-navy">
           <span className="font-semibold">Senior bar: </span>
@@ -113,5 +122,35 @@ function ComponentRow({ component }: { component: NexoraComponent }) {
         </div>
       </div>
     </li>
+  );
+}
+
+/**
+ * Reads the weak-area finding from the Task section's diagnosis pick and
+ * carries it in as this section's starting condition. Absent (no pick yet)
+ * or wrong picks render nothing — only a confirmed finding is worth quoting
+ * back, so the learner isn't anchored on a guess they've since abandoned.
+ */
+function DiagnosisCarryover({ section }: { section: Task1Section }) {
+  const hydrated = useHydrated();
+  const pickedCode = useProgress((s) => s.choices[section.id]);
+  const picked = hydrated ? pickedCode : undefined;
+
+  if (!picked || picked !== section.diagnosis.correct) return null;
+
+  const area = section.categories.find((c) => c.code === picked);
+  if (!area) return null;
+
+  return (
+    <div className="rounded-2xl border-l-4 border-purple bg-lilac/30 p-4">
+      <p className="text-caption font-semibold uppercase tracking-wide text-purple">
+        Carried in from Task
+      </p>
+      <p className="mt-1 text-body text-ink">
+        Your diagnosis: <span className="font-semibold">{area.name}</span> is
+        where Nexora is weakest — {area.blurb.toLowerCase()} Let that pressure-test
+        which components below you push hardest.
+      </p>
+    </div>
   );
 }

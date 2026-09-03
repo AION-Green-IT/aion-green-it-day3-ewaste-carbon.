@@ -2,26 +2,27 @@ import {
   content,
   getSection,
   type BasicsSection,
-  type BlueGridSection,
+  // type BlueGridSection, — hidden for now, keep for later use
   type NexoraSection,
   type Task1Section,
-  type Task2Section,
+  // type Task2Section, — hidden for now, keep for later use
 } from "@/lib/content";
 import { Section } from "@/components/ui/Section";
 import { Opening } from "@/components/chrome/Opening";
 import { Basics } from "@/components/mechanics/Basics";
 import { RiskCategorizer } from "@/components/mechanics/RiskCategorizer";
-import { PriorityPicker } from "@/components/mechanics/PriorityPicker";
-import { CasePriority } from "@/components/mechanics/CasePriority";
+// import { PriorityPicker } from "@/components/mechanics/PriorityPicker"; — hidden for now, keep for later use
+// import { CasePriority } from "@/components/mechanics/CasePriority"; — hidden for now, keep for later use
 import { StarterKit } from "@/components/mechanics/StarterKit";
+import { SectionReset } from "@/components/chrome/SectionReset";
 import { LeafMark } from "@/components/chrome/Icons";
 
 export default function Page() {
   const { meta } = content;
   const basics = getSection<BasicsSection>("basics");
   const task1 = getSection<Task1Section>("task1");
-  const task2 = getSection<Task2Section>("task2");
-  const bluegrid = getSection<BlueGridSection>("bluegrid");
+  // const task2 = getSection<Task2Section>("task2"); — hidden for now, keep for later use
+  // const bluegrid = getSection<BlueGridSection>("bluegrid"); — hidden for now, keep for later use
   const nexora = getSection<NexoraSection>("nexora");
 
   return (
@@ -60,20 +61,29 @@ export default function Page() {
 
       <Divider />
 
-      {/* Block 1b — Task 1 */}
+      {/* Block 1b — Task: diagnoses Nexora's weak area, carried into Nexora below */}
       <Section
         id="task1"
         kicker={task1.kicker}
         title={task1.title}
         intro={task1.intro}
         doneRule={task1.doneRule}
+        action={
+          task1.resetLabel && task1.resetNote ? (
+            <SectionReset
+              sectionId="task1"
+              label={task1.resetLabel}
+              note={task1.resetNote}
+            />
+          ) : null
+        }
       >
         <RiskCategorizer section={task1} />
       </Section>
 
+      {/* Block 1c — Task 2 — hidden for now, keep for later use
       <Divider />
 
-      {/* Block 1c — Task 2 */}
       <Section
         id="task2"
         kicker={task2.kicker}
@@ -83,10 +93,11 @@ export default function Page() {
       >
         <PriorityPicker section={task2} />
       </Section>
+      */}
 
+      {/* Block 2 — BlueGrid case — hidden for now, keep for later use
       <Divider />
 
-      {/* Block 2 — BlueGrid case */}
       <Section
         id="bluegrid"
         kicker={bluegrid.kicker}
@@ -96,6 +107,7 @@ export default function Page() {
       >
         <CasePriority section={bluegrid} />
       </Section>
+      */}
 
       <Divider />
 
@@ -107,7 +119,7 @@ export default function Page() {
         intro={nexora.intro}
         doneRule={nexora.doneRule}
       >
-        <StarterKit section={nexora} />
+        <StarterKit section={nexora} diagnosisSection={task1} />
       </Section>
     </>
   );
