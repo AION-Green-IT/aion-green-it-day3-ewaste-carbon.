@@ -9,6 +9,7 @@ import {
   containsNumber,
   isRefusal,
   officeBTotalUnits,
+  parseLearnerNumber,
   withinTolerance,
 } from "@/lib/workBlock2";
 
@@ -322,8 +323,8 @@ function Calculator({
     setRows((prev) => prev.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
 
   const carbonRowResult = (row: CarbonRow): number | null => {
-    const units = Number.parseFloat(row.units.replace(",", "."));
-    const cycle = Number.parseFloat(row.cycleYears.replace(",", "."));
+    const units = parseLearnerNumber(row.units);
+    const cycle = parseLearnerNumber(row.cycleYears);
     if (Number.isNaN(units) || Number.isNaN(cycle) || cycle === 0) return null;
     return (units / cycle) * factorValue(table, config, row.factorRef);
   };
@@ -333,14 +334,17 @@ function Calculator({
     ? (carbonResults as number[]).reduce((a, b) => a + b, 0)
     : null;
 
-  const disposalUnitsNum = Number.parseFloat(disposalUnits.replace(",", "."));
+  const disposalUnitsNum = parseLearnerNumber(disposalUnits);
   const disposalResult =
     Number.isNaN(disposalUnitsNum) || !factor1Ref || !factor2Ref
       ? null
       : disposalUnitsNum *
         (factorValue(table, config, factor1Ref) - factorValue(table, config, factor2Ref));
 
-  const formatResult = (v: number) => (tonnes ? `${(v / 1000).toFixed(3)} t CO₂e` : `${v.toLocaleString()} kg CO₂e`);
+  // Plain digits, no thousands grouping — this is exactly what should be
+  // typed into the question fields below, so a copy-paste never breaks it.
+  const formatResult = (v: number) =>
+    tonnes ? `${(v / 1000).toFixed(3)} t CO₂e` : `${Math.round(v * 100) / 100} kg CO₂e`;
 
   return (
     <div className="rounded-xl border border-line bg-paper p-3">

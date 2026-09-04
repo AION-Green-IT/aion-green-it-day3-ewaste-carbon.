@@ -74,13 +74,49 @@ export function computePartAAnswers(config: WorkBlock2Config): {
   return { q1, q2, q3, q4 };
 }
 
+const THOUSANDS_COMMA = /^-?\d{1,3}(,\d{3})+$/;
+const THOUSANDS_DOT = /^-?\d{1,3}(\.\d{3})+$/;
+
+/**
+ * Parses a learner-typed number under either Indonesian ("4.966,67" — dot
+ * thousands, comma decimal) or English ("4,966.67") formatting, plus the
+ * plain single-separator forms each style shortens to on its own
+ * ("4966,67", "4966.67", "7,000", "7.000"). When both separators appear,
+ * whichever one appears last is the decimal point and the other is
+ * thousands grouping to strip. With only one separator, it's thousands
+ * grouping solely when it's followed by nothing but three-digit groups
+ * ("7,000", "7.000") — otherwise it's read as the decimal point, so a
+ * genuine decimal like "4966,67" is never mistaken for one.
+ */
+export function parseLearnerNumber(input: string): number {
+  let s = input.trim();
+  const hasComma = s.includes(",");
+  const hasDot = s.includes(".");
+
+  if (hasComma && hasDot) {
+    s =
+      s.lastIndexOf(",") > s.lastIndexOf(".")
+        ? s.replace(/\./g, "").replace(",", ".")
+        : s.replace(/,/g, "");
+  } else if (hasComma && THOUSANDS_COMMA.test(s)) {
+    s = s.replace(/,/g, "");
+  } else if (hasComma) {
+    s = s.replace(",", ".");
+  } else if (hasDot && THOUSANDS_DOT.test(s)) {
+    s = s.replace(/\./g, "");
+  }
+
+  return Number.parseFloat(s);
+}
+
 /**
  * Numeric-answer check: ±2% relative tolerance, comma or period accepted as
- * the decimal separator. Empty or unparseable input is simply not correct
- * yet — never flagged as a hard wrong answer.
+ * the decimal separator (or as thousands grouping — see `parseLearnerNumber`).
+ * Empty or unparseable input is simply not correct yet — never flagged as a
+ * hard wrong answer.
  */
 export function withinTolerance(input: string, correct: number, tolerancePct = 2): boolean {
-  const parsed = Number.parseFloat(input.trim().replace(",", "."));
+  const parsed = parseLearnerNumber(input);
   if (Number.isNaN(parsed)) return false;
   return Math.abs(parsed - correct) <= Math.abs(correct) * (tolerancePct / 100);
 }
